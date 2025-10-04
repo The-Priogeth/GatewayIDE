@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+
+  meganode:
+    image: alpine:3.20
+    container_name: gateway-meganode
+    command: ["sh", "-c", "echo Mega-Node stub up; tail -f /dev/null"]
+    restart: unless-stopped
+
+  gateway:
+    container_name: gateway-container
+    build:
+      context: ../               # Repo-Root (Dockerfile & Code sichtbar)
+      dockerfile: deploy/scripts/Dockerfile.ai
+    env_file:
+      - ../.env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    working_dir: /app
+    command: >
+      bash -lc "uvicorn main:app --host 0.0.0.0 --port 8080 --no-access-log"
+    volumes:
+      - ../:/app                 # Dev-Workflow: Live-Code im Container
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/docs"]
+      interval: 10s
+      timeout: 3s
+      retries: 10

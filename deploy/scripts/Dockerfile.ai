@@ -1,0 +1,41 @@
+# Leichtgewichtig + schnell: slim + uv (nutzt dein pyproject.toml)
+FROM python:3.11-slim
+
+# Non-interactive + Basics (curl nötig für Healthcheck)
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates tzdata curl bash \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# --- Dependencies cachen ------------------------------------------------------
+# Zuerst nur Metadaten kopieren für besseren Build-Cache
+COPY pyproject.toml uv.lock* ./
+
+# uv installieren und Environment synchronisieren
+# --frozen nimmt uv.lock, Fallback ohne Lock wenn nicht vorhanden
+RUN pip install --no-cache-dir --upgrade pip uv \
+ && (uv sync --frozen || uv sync)
+
+# uv legt das venv in /app/.venv an → PATH setzen
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH=/app
+
+# --- Quellcode ----------------------------------------------------------------
+COPY . .
+
+# --- Laufzeit -----------------------------------------------------------------
+EXPOSE 8080
+
+# Optionaler Healthcheck (Compose kann zusätzlich eigenen haben)
+# HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+#   CMD curl -fsS http://localhost:8080/docs || exit 1
+
+# Default-Start; Compose darf das überschreiben
+# (Dein Backend stellt `main:app` bereit)
+CMD ["bash", "-lc", "uvicorn main:app --host 0.0.0.0 --port 8080 --no-access-log"]

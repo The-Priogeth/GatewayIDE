@@ -1,0 +1,46 @@
+GET /api/conference/export/<name>
+PATCH /api/conference/<name>/agents
+POST /api/agents/clone/<name>
+DELETE /api/conference/<name>
+main.py GET	/status
+/ws/reload
+/ws/conference
+GET	/api/logs
+GET	/api/conference/list
+GET	/api/conference/history?room=name
+GET	/api/conference/lobby
+POST	/api/conference/lobby/say
+POST	/api/conference/start
+GET	/api/agents/settings/<name>
+POST	/api/agents/respond/<name>
+DELETE	/api/agents/delete/<name>
+POST	/api/agents/create
+GET	/api/agents/status
+GET /api/conference/{id}/events
+GET /api/info/structure
+PATCH /api/conference/{id}/add_agent
+WS/fastagency/ws
+POST	/token
+POST	/fastagency/initiate_workflow
+GET	/fastagency/discovery
+POST	/api/system/wipe
+POST	/api/system/rebuild
+GET	/api/system/status
+GET	/api/system/logs
+DELETE	/api/history/conferences/{id}
+GET	/api/history/conferences/
+GET	/api/history/chats/{id}
+GET	/api/conference/history/{id}
+GET	/api/conference/list
+DELETE	/api/conference/{id}
+GET	/api/conference/{id}
+POST	/api/conference/say
+POST	/api/conference/create
+PUT	/api/agents/{name}
+GET	/api/agents/{name}
+DELETE	/api/agents/{name}
+POST	/api/agents/create
+GET	/api/agents/
+GET /openapi.json
+GET /docs
+GET /redoc

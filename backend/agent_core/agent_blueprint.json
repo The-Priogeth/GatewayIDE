@@ -1,0 +1,17 @@
+{
+  "name": "string",
+  "description": "string",
+  "system_message": "string", 
+  "llm_config": {
+    "model": "string",
+    "temperature": "float",
+    "max_tokens": "int",
+    "timeout": "int",
+    "config_list": ["api_key"]
+  },
+  "code_execution_config": {
+    "use_docker": "bool",
+    "lang": "string"
+  }
+}
+

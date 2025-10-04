@@ -1,0 +1,15 @@
+syntax = "proto3";
+package gateway.ai.v1;
+
+option csharp_namespace = "Gateway.AI.V1";
+
+service AIService {
+  rpc Echo (EchoRequest) returns (EchoReply);
+  rpc ChatStream (stream ChatClientMsg) returns (stream ChatServerMsg);
+}
+
+message EchoRequest { string text = 1; }
+message EchoReply   { string text = 1; }
+
+message ChatClientMsg { string text = 1; }
+message ChatServerMsg { string text = 1; }
