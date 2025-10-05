@@ -89,6 +89,9 @@ uv.lock
 __pypackages__/
 
 # Build
+**/bin/
+**/obj/
+*.lnk
 bin/
 obj/
 *.user
