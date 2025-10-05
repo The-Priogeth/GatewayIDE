@@ -1,91 +1,76 @@
 @echo off
 setlocal enabledelayedexpansion
-pushd "%~dp0"
 
-REM ========= Konfiguration =========
-set "SLN=GatewayIDE.sln"
-set "CSPROJ=src\GatewayIDE.App\GatewayIDE.App.csproj"
-set "RUNTIME=win-x64"
+rem ===========================================================
+rem  GatewayIDE - Windows Build Script (clean & organized)
+rem ===========================================================
 
-REM Publish-Ziel in bin\win-x64
-set "OUTDIR=%~dp0bin\win-x64"
-set "EXE=%OUTDIR%\GatewayIDE.App.exe"
-
-REM Link im Root
-set "SHORTCUT=%~dp0GatewayIDE.lnk"
-REM =================================
+set ROOT=%~dp0
+set SRC=%ROOT%src\GatewayIDE.App
+set SLN=%ROOT%GatewayIDE.sln
+set CSPROJ=%SRC%\GatewayIDE.App.csproj
+set OUTDIR=%SRC%\bin\Release
+set RUNTIME=win-x64
 
 echo.
-echo ==================================================
-echo   GatewayIDE Installer / Builder (Windows, .NET)
-echo ==================================================
-echo   Solution:    %SLN%
-echo   Projekt:     %CSPROJ%
-echo   Runtime:     %RUNTIME%
-echo   Ausgabedatei:%EXE%
-echo   Shortcut:    %SHORTCUT%
-echo --------------------------------------------------
+echo ===========================================================
+echo  🚀  BUILD START: GatewayIDE (Release | %RUNTIME%)
+echo ===========================================================
+echo.
 
-REM 0) .NET SDK?
-dotnet --version >nul 2>&1 || (echo [FEHLER] .NET SDK fehlt.& goto :wait)
-
-REM 1) Solution
-if not exist "%SLN%" (
-  echo [INFO] Erzeuge Solution: %SLN%
-  dotnet new sln -n GatewayIDE || goto :wait
-) else ( echo [OK] Solution existiert: %SLN% )
-
-REM 2) Projekt in Solution?
-echo [CHECK] Pruefe Projekt-Eintrag in Solution ...
-dotnet sln "%SLN%" list | findstr /i /c:"GatewayIDE.App" >nul || (
-  echo [INFO] Fuege Projekt hinzu ...
-  dotnet sln "%SLN%" add "%CSPROJ%" || goto :wait
+rem --- Prüfen auf .NET SDK ---
+dotnet --version >nul 2>&1
+if errorlevel 1 (
+  echo [FEHLER] .NET SDK nicht gefunden. Bitte .NET 8 oder neuer installieren.
+  exit /b 1
 )
-echo [OK] Projekt ist eingetragen.
 
-REM 3) Restore + Clean + Cache löschen
-echo [INFO] dotnet restore ...
-dotnet restore "%CSPROJ%" || goto :wait
+rem --- Alte Build-Artefakte löschen ---
+if exist "%SRC%\obj" (
+  echo [INFO] Lösche obj-Verzeichnis ...
+  rmdir /s /q "%SRC%\obj"
+)
+if exist "%SRC%\bin" (
+  echo [INFO] Lösche bin-Verzeichnis ...
+  rmdir /s /q "%SRC%\bin"
+)
 
-echo [INFO] dotnet clean ...
-dotnet clean "%CSPROJ%" || goto :wait
+rem --- Solution prüfen / anlegen ---
+if not exist "%SLN%" (
+  echo [INFO] Erzeuge Solution-Datei ...
+  dotnet new sln -n GatewayIDE
+)
+dotnet sln "%SLN%" list | findstr /i "GatewayIDE.App" >nul
+if errorlevel 1 (
+  echo [INFO] Füge Projekt zur Solution hinzu ...
+  dotnet sln "%SLN%" add "%CSPROJ%"
+)
 
-echo [INFO] Loesche bin/obj (hart) ...
-if exist "src\GatewayIDE.App\bin" rmdir /s /q "src\GatewayIDE.App\bin"
-if exist "src\GatewayIDE.App\obj" rmdir /s /q "src\GatewayIDE.App\obj"
+rem --- Restore & Publish ---
+echo.
+echo [INFO] Wiederherstellung von NuGet-Paketen ...
+dotnet restore "%CSPROJ%"
+if errorlevel 1 (
+  echo [FEHLER] Restore fehlgeschlagen.
+  exit /b 1
+)
 
-REM 4) Zielordner sicherstellen
-if not exist "%OUTDIR%" mkdir "%OUTDIR%"
-
-REM 5) Publish (Release, SingleFile, self-contained) -> bin\win-x64
-echo [INFO] Build + Publish (Release, %RUNTIME%) ...
+echo.
+echo [INFO] Erstelle Release Build ...
 dotnet publish "%CSPROJ%" -c Release -r %RUNTIME% --self-contained true ^
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true ^
   -o "%OUTDIR%"
 if errorlevel 1 (
-  echo [FEHLER] dotnet publish fehlgeschlagen.
-  goto :wait
+  echo [FEHLER] Build fehlgeschlagen.
+  exit /b 1
 )
 
-REM 6) Shortcut im Root erstellen/überschreiben
-echo [INFO] Erzeuge/aktualisiere Shortcut im Root ...
-powershell -NoProfile -Command ^
-  "$s=(New-Object -ComObject WScript.Shell).CreateShortcut('%SHORTCUT%');" ^
-  "$s.TargetPath='%EXE%';$s.WorkingDirectory='%~dp0';$s.WindowStyle=1;$s.IconLocation='%EXE%,0';$s.Save()" >nul
-
-REM Optional: alte Root-EXE aufräumen (falls vorher mal reinpublisht)
-REM if exist "%~dp0GatewayIDE.App.exe" del /q "%~dp0GatewayIDE.App.exe"
-
 echo.
-echo ==========================================
-echo  Build fertig: "%EXE%"
-echo  Shortcut:     "%SHORTCUT%"
-echo  (Root bleibt clean; Artefakte liegen unter .\bin\win-x64)
-echo ==========================================
-
-:wait
+echo ===========================================================
+echo  ✅  Build abgeschlossen!
+echo -----------------------------------------------------------
+echo  Ausgabe: %OUTDIR%\GatewayIDE.App.exe
+echo ===========================================================
 echo.
-set /p _="Druecke ENTER zum Schliessen ... "
-popd
+pause
 endlocal
-exit /b

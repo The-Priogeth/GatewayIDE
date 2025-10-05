@@ -110,3 +110,17 @@ __pycache__/
 
 # Avalonia
 *.axaml.cs.*.cache
+
+# Eigene Ergänzungen
+# Avalonia/AvalonDock Cache
+*.axaml.cs.*.cache
+# Crash‑Logs
+GatewayIDE-crash.log
+# Windows‑Shortcuts
+*.lnk
+# Visual Studio
+.vs/
+# Legacy‑Dokumentation ausblenden
+/docs/legacy/
+# Docker‑Artefakte
+**/deploy/**/logs/
