@@ -56,8 +56,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ICommand ToggleChatCommand { get; }
     public ICommand SelectTabCommand { get; }
     public ICommand SendChatCommand { get; }
-    public ICommand CheckDockerCommand { get; }
-    public ICommand CheckAIStatusCommand { get; }
     public ICommand StartAiCommand { get; }
     public ICommand StopAiCommand { get; }
     public ICommand StartMeganodeCommand { get; }
@@ -84,17 +82,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
         });
 
-        CheckDockerCommand = new DelegateCommand(_ =>
-        {
-            var (ok, msg) = DockerService.CheckDockerAvailable();
-            Append(ok ? $"[DOCKER] {msg}" : $"[DOCKER-ERR] {msg}");
-        });
 
-        CheckAIStatusCommand = new DelegateCommand(_ =>
-        {
-            var (ok, msg) = DockerService.CheckAIContainer();
-            Append($"[AI-STATUS] {msg}");
-        });
 
         StartAiCommand = new DelegateCommand(_ => StartAi());
         StopAiCommand = new DelegateCommand(_ => StopAi());
