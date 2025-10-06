@@ -103,12 +103,45 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly StringBuilder _dockerOut = new();
     private readonly StringBuilder _dockerErr = new();
     private readonly StringBuilder _gatewayLog = new();
+    private readonly StringBuilder _containerIO = new();
+
+    // ===== Buffer Properties =====
     public string GatewayLogBuffer => _gatewayLog.ToString();
     public string DockerOutBuffer => _dockerOut.ToString();
     public string DockerErrBuffer => _dockerErr.ToString();
-    private void AppendGateway(string s) { _gatewayLog.Append(s); Raise(nameof(GatewayLogBuffer)); }
-    private void AppendDockerOut(string s) { _dockerOut.Append(s); Raise(nameof(DockerOutBuffer)); }
-    private void AppendDockerErr(string s) { _dockerErr.Append(s); Raise(nameof(DockerErrBuffer)); }
+    public string ContainerIOBuffer => _containerIO.ToString();
+
+    // ===== Caret Properties (AutoScroll) =====
+    public int GatewayLogCaret    => _gatewayLog.Length;
+    public int DockerOutCaret     => _dockerOut.Length;
+    public int DockerErrCaret     => _dockerErr.Length;
+    public int ContainerIOCaret   => _containerIO.Length;
+    
+    private void AppendGateway(string s)
+    {
+        _gatewayLog.Append(s);
+        Raise(nameof(GatewayLogBuffer));
+        Raise(nameof(GatewayLogCaret));
+    }
+    private void AppendDockerOut(string s)
+    {
+        _dockerOut.Append(s);
+        Raise(nameof(DockerOutBuffer));
+        Raise(nameof(DockerOutCaret));
+    }
+    private void AppendDockerErr(string s)
+    {
+        _dockerErr.Append(s);
+        Raise(nameof(DockerErrBuffer));
+        Raise(nameof(DockerErrCaret));
+    }
+
+    private string _containerCommand = string.Empty;
+    public string ContainerCommand
+    {
+        get => _containerCommand;
+        set { _containerCommand = value; Raise(); }
+    }
 
     // ===== Docker log processes =====
     private Process? _meganodeLogsProc;
@@ -116,7 +149,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     // >>> Tail-Guard für Gateway-Runtime-Logs (nur EIN logs -f)
     private CancellationTokenSource? _gatewayTailCts;
 
-    // ===== Commands (match XAML) =====
+    // ===== Commands Propertys (match XAML) =====
     public ICommand ToggleChatCommand { get; }
     public ICommand SelectTabCommand { get; }
     public ICommand SendChatCommand { get; }
@@ -125,6 +158,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ICommand StartGatewayCommand { get; }
     public ICommand StopGatewayCommand { get; }
     public ICommand RemoveGatewayContainerCommand { get; }
+    public ICommand ClearAllLogsCommand { get; }
+    public ICommand ExecuteInContainerCommand { get; }
+
 
     // ===== Konstruktor =====
     public MainWindowViewModel()
@@ -138,6 +174,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         StopGatewayCommand    = new DelegateCommand(async _ => await StopGatewayAsync());
         RemoveGatewayContainerCommand = new DelegateCommand(async _ => await RemoveGatewayContainerAsync());
         StartMeganodeCommand = new DelegateCommand(_ => StartMeganode());
+        ClearAllLogsCommand = new DelegateCommand(_ => ClearAllLogs());
+        ExecuteInContainerCommand = new DelegateCommand(async p => await ExecuteInContainerAsync(p as string));
 
         _ = RefreshSystemStatusAsync();
     }
@@ -256,9 +294,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private async Task StartGatewayAsync()
     {
-        _dockerOut.Clear();  Raise(nameof(DockerOutBuffer));
-        _dockerErr.Clear();  Raise(nameof(DockerErrBuffer));
-        _gatewayLog.Clear(); Raise(nameof(GatewayLogBuffer));
 
         await DockerService.StartGatewayAsync(AppendDockerOut, AppendDockerErr);
 
@@ -292,7 +327,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AppendDockerErr("❌ Remove fehlgeschlagen: " + ex.Message + Environment.NewLine);
         }
     }
-
 
     private async Task RefreshSystemStatusAsync()
     {
@@ -335,9 +369,32 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    private async Task ExecuteInContainerAsync(string? paramText = null)
+    {
+        var cmd = (paramText ?? ContainerCommand ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(cmd)) return;
 
+        _containerIO.AppendLine($"> {cmd}");
+        Raise(nameof(ContainerIOBuffer));
+        Raise(nameof(ContainerIOCaret));
 
+        await DockerService.ExecInGatewayAsync(
+            cmd,
+            o => { _containerIO.Append(o); Raise(nameof(ContainerIOBuffer)); },
+            e => { _containerIO.Append(e); Raise(nameof(ContainerIOBuffer)); }
+        );
+            ContainerCommand = string.Empty; Raise(nameof(ContainerCommand));
+    }
 
+    private void ClearAllLogs()
+    {
+        _dockerOut.Clear();   Raise(nameof(DockerOutBuffer));   // links oben
+        _dockerErr.Clear();   Raise(nameof(DockerErrBuffer));   // rechts oben
+        _gatewayLog.Clear();  Raise(nameof(GatewayLogBuffer));  // mitte
+        _containerIO.Clear(); Raise(nameof(ContainerIOBuffer)); // unten
+        // optional:
+        // ContainerCommand = string.Empty; // Eingabefeld leeren
+    }
 
     // ===== Meganode =====
     private void StartMeganode()

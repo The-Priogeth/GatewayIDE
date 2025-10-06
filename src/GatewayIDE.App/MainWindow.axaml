@@ -132,54 +132,38 @@
                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
           </Border>
         </Grid>
+        <!-- -->
+        <!-- DOCKER: Buttonleiste + 2 Terminals oben + 1 Terminal mitte + 1 unten -->
+        <Grid IsVisible="{Binding IsDocker}" RowDefinitions="Auto,4*,4*,2*" Margin="8">
 
-        <!-- DOCKER: Buttonleiste + 2 Terminals oben + 1 Terminal unten -->
-        <Grid IsVisible="{Binding IsDocker}" RowDefinitions="Auto,*" Margin="8">
           <!-- Buttonleiste -->
           <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
             <Button Content="Rebuild (wipe + build)" Command="{Binding RebuildGatewayCommand}" />
-            <Button Content="Start(up)" Command="{Binding StartGatewayCommand}" />
-            <Button Content="Stop(down)" Command="{Binding StopGatewayCommand}" />
-            <Button Content="Remove container" Command="{Binding RemoveGatewayContainerCommand}" />
-
+            <Button Content="Start (up)"             Command="{Binding StartGatewayCommand}" />
+            <Button Content="Stop (down)"            Command="{Binding StopGatewayCommand}" />
+            <Button Content="Remove container"       Command="{Binding RemoveGatewayContainerCommand}" />
+            <Button Content="Clear Logs"             Command="{Binding ClearAllLogsCommand}" />
           </StackPanel>
 
-          <!-- Terminals: oben 50/50, unten 50/100 -->
-          <Grid Grid.Row="1" RowDefinitions="*,8,*">
-            <!-- OBERER BLOCK: 2 Spalten (Out | Err) -->
-            <Grid Grid.Row="0" ColumnDefinitions="*,8,*">
-              <Border Grid.Column="0" BorderBrush="#444" BorderThickness="1">
-                <TextBox x:Name="DockerOutBox"
-                        Text="{Binding DockerOutBuffer}"
-                        CaretIndex="{Binding Text.Length, ElementName=DockerOutBox}"
-                        TextWrapping="Wrap"
-                        FontFamily="Consolas, Menlo, monospace"
-                        IsReadOnly="True"
-                        AcceptsReturn="True"
-                        Background="#0b0b0b"
-                        Foreground="#d8d8d8"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-              </Border>
+          <!-- OBERER BLOCK (Row 1): 2 Terminals nebeneinander (Out | Err) -->
+          <Grid Grid.Row="1" ColumnDefinitions="*,8,*">
+            <Border Grid.Column="0" BorderBrush="#444" BorderThickness="1">
+              <TextBox x:Name="DockerOutBox"
+                      Text="{Binding DockerOutBuffer}"
+                      CaretIndex="{Binding DockerOutCaret}"
+                      TextWrapping="Wrap"
+                      FontFamily="Consolas, Menlo, monospace"
+                      IsReadOnly="True"
+                      AcceptsReturn="True"
+                      Background="#0b0b0b"
+                      Foreground="#d8d8d8"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Border>
 
-              <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1">
-                <TextBox x:Name="DockerErrBox"
-                        Text="{Binding DockerErrBuffer}"
-                        CaretIndex="{Binding Text.Length, ElementName=DockerErrBox}"
-                        TextWrapping="Wrap"
-                        FontFamily="Consolas, Menlo, monospace"
-                        IsReadOnly="True"
-                        AcceptsReturn="True"
-                        Background="#0b0b0b"
-                        Foreground="#d8d8d8"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-              </Border>
-            </Grid>
-
-            <!-- UNTERER BLOCK: 1 Spalte (Gateway-Container Runtime-Logs) -->
-            <Border Grid.Row="2" BorderBrush="#444" BorderThickness="1">
-              <TextBox x:Name="GatewayLogBox"
-                      Text="{Binding GatewayLogBuffer}"
-                      CaretIndex="{Binding Text.Length, ElementName=GatewayLogBox}"
+            <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1">
+              <TextBox x:Name="DockerErrBox"
+                      Text="{Binding DockerErrBuffer}"
+                      CaretIndex="{Binding DockerErrCaret}"
                       TextWrapping="Wrap"
                       FontFamily="Consolas, Menlo, monospace"
                       IsReadOnly="True"
@@ -189,7 +173,57 @@
                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
             </Border>
           </Grid>
+
+          <!-- MITTLERER BLOCK (Row 2): Gateway-Container Runtime-Logs (100% Breite) -->
+          <Border Grid.Row="2" BorderBrush="#444" BorderThickness="1">
+            <TextBox x:Name="GatewayLogBox"
+                    Text="{Binding GatewayLogBuffer}"
+                    CaretIndex="{Binding GatewayLogCaret}"
+                    TextWrapping="Wrap"
+                    FontFamily="Consolas, Menlo, monospace"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    Background="#0b0b0b"
+                    Foreground="#d8d8d8"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+          </Border>
+
+          <!-- UNTEN (Row 3): Ausgabe oben, Eingabe unten -->
+          <Grid Grid.Row="3" RowDefinitions="*,Auto">
+
+            <!-- Output -->
+            <Border Grid.Row="0" BorderBrush="#444" BorderThickness="1">
+              <TextBox x:Name="ContainerIOBox"
+                      Text="{Binding ContainerIOBuffer}"
+                      CaretIndex="{Binding ContainerIOCaret}"
+                      TextWrapping="Wrap"
+                      FontFamily="Consolas, Menlo, monospace"
+                      IsReadOnly="True"
+                      AcceptsReturn="True"
+                      Background="#0b0b0b"
+                      Foreground="#d8d8d8"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Border>
+
+            <!-- Input: ENTER sendet, ohne Extra-Button -->
+            <TextBox x:Name="ContainerCmdBox"
+                    Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Watermark="Befehl im Container ausführen (z. B. pip list)"
+                    Text="{Binding ContainerCommand, Mode=TwoWay}">
+              <TextBox.KeyBindings>
+                <KeyBinding Gesture="Enter"
+                            Command="{Binding ExecuteInContainerCommand}"
+                            CommandParameter="{Binding Text, ElementName=ContainerCmdBox}" />
+              </TextBox.KeyBindings>
+            </TextBox>
+
+          </Grid>
+
+
+
         </Grid>
+
 
       </Grid>
     </Grid>

@@ -8,10 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Optional, Callable, Awaitable, cast
 from loguru import logger
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-
 from backend import bootstrap
 from backend.routes.websocket import start_watcher
 from backend.ag2.autogen.agentchat import UserProxyAgent
@@ -69,36 +66,26 @@ async def lifespan(app: FastAPI):
     app.state.memory = runtime.memory
     app.state.mem_thread = runtime.mem_thread
     
-
-
     logger.info("ready: user={} thread={}", app.state.user_id, app.state.thread_id)
 
-    # Dev watcher (robust path regardless of Docker mount)
-    watcher = None
+    watcher_thread = None
+    watcher_stop = None
     try:
         backend_dir = str(Path(__file__).resolve().parent)
-        watcher = start_watcher(path=backend_dir)
+        watcher_thread, watcher_stop = start_watcher(path=backend_dir)
         yield
     finally:
         try:
-            if watcher is not None:
-                if hasattr(watcher, "stop"):
-                    watcher.stop()
-                if hasattr(watcher, "join"):
-                    watcher.join(timeout=5)
+            if watcher_stop is not None:
+                watcher_stop.set()          # beendet watchfiles-Iterator
+            if watcher_thread is not None:
+                watcher_thread.join(timeout=5)
         except Exception:
             pass
 
-        # Close ZEP client if it exposes an async close (type-safe for Pylance)
-        try:
-            zep = getattr(app.state, "zep_client", None)
-            aclose_f = cast(Optional[Callable[[], Awaitable[None]]], getattr(zep, "aclose", None))
-            if aclose_f is not None:
-                await aclose_f()
-        except Exception:
-            pass
-
+        # (ZEP shutdown …)
         logger.info("shutdown: ok")
+        # test
 
 # -----------------------------------------------------------------------------
 # App factory & middleware
@@ -110,18 +97,6 @@ app: FastAPI = FastAPI(
     version="0.5",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ALLOW_ORIGINS,
-    allow_credentials=CORS_ALLOW_CREDENTIALS,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Serve minimal HTML UI at /ui (if present)
-static_dir = os.path.join("backend", "static")
-if os.path.isdir(static_dir):
-    app.mount("/ui", StaticFiles(directory=static_dir, html=True), name="ui")
 
 # -----------------------------------------------------------------------------
 # Chat API (Manager-driven): feed prompt into the lobby and let the manager route

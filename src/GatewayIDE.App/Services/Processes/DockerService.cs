@@ -224,6 +224,22 @@ namespace GatewayIDE.App.Services.Processes
             // return RunAsync("docker", "rm -f gateway-container", o, e, ct);
         }
 
+        public static Task<int> ExecInGatewayAsync(
+            string command,
+            Action<string>? o = null,
+            Action<string>? e = null,
+            CancellationToken ct = default)
+        {
+            // Container-Name muss zu compose passen:
+            const string container = "gateway-container";
+            var escaped = command.Replace("\"", "\\\"");
+            // bash -lc erlaubt Pipes, &&, Aliases etc.
+            return RunAsync("docker", $"exec {container} bash -lc \"{escaped}\"", o, e, ct);
+        }
+
+
+
+
 
     }
 }

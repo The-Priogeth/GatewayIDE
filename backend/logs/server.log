@@ -1,0 +1,159 @@
+2025-10-06 16:04:26.255 | INFO     | main:lifespan:74 - ready: user=groupchat_f274d4ba thread=thread_groupchat_f7c8590e
+2025-10-06 16:04:26.257 | INFO     | backend.routes.websocket:watcher:59 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 16:04:26.866 | INFO     | backend.routes.websocket:start_watcher:67 - 🧵 Watcher-Thread gestartet.
+2025-10-06 16:04:27.918 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:29.221 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:30.523 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:31.825 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:33.136 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:34.444 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:35.751 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:37.122 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:38.443 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:39.762 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:41.142 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:42.474 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:43.804 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:45.170 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:46.605 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:48.084 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:49.552 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:50.967 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:52.342 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:53.767 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:55.092 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:56.144 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:57.446 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:04:58.748 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:00.101 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:01.455 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:02.814 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:04.129 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:05.445 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:06.803 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:08.126 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:09.501 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:10.827 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:12.205 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:13.586 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:14.917 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:16.299 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:17.621 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:18.991 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:20.367 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:21.692 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:23.026 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:24.413 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:25.359 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:26.717 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:27.969 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:29.271 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:30.573 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:31.929 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:33.292 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:34.659 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:36.030 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:37.354 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:38.727 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:40.053 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:41.435 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:42.820 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:44.155 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:45.541 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:46.978 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:48.413 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:49.738 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:51.113 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:52.490 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:53.868 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:54.974 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:56.276 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:57.579 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:05:58.881 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:00.233 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:01.590 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:02.905 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:04.275 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:05.646 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:07.023 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:08.347 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:09.723 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:11.104 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:12.489 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:13.824 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:15.210 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:16.546 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:17.933 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:19.314 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:20.705 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:22.030 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:23.351 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:24.724 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:25.747 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:27.049 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:28.352 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:29.655 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:31.012 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:32.324 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:33.639 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:35.010 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:36.383 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:37.759 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:39.085 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:40.462 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:41.792 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:43.175 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:44.508 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:45.885 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:47.200 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:48.565 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:49.929 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:51.289 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:52.608 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:53.978 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:54.951 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:56.303 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:57.604 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:06:58.957 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:00.310 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:01.615 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:02.979 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:04.298 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:05.668 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:07.043 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:08.417 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:09.795 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:11.119 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:12.501 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:13.829 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:15.162 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:16.546 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:17.875 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:19.185 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:20.546 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:21.857 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:23.189 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:24.262 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:25.635 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:26.987 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:28.340 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:29.642 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:07:30.996 | INFO     | backend.routes.websocket:watcher:61 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/logs/server.log')}
+2025-10-06 16:41:39.459 | INFO     | main:lifespan:69 - ready: user=groupchat_9273595f thread=thread_groupchat_b54ed8b3
+2025-10-06 16:41:39.461 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 16:41:39.461 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-06 16:41:55.090 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-06 17:32:27.925 | INFO     | main:lifespan:87 - shutdown: ok
+2025-10-06 18:08:15.444 | INFO     | main:lifespan:69 - ready: user=groupchat_bf448f77 thread=thread_groupchat_6ba7b4eb
+2025-10-06 18:08:15.446 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 18:08:15.446 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-06 18:17:12.564 | INFO     | main:lifespan:69 - ready: user=groupchat_4f6f80c6 thread=thread_groupchat_3eef7715
+2025-10-06 18:17:12.565 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 18:17:12.565 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-06 19:24:33.806 | INFO     | main:lifespan:69 - ready: user=groupchat_28125ced thread=thread_groupchat_1b503803
+2025-10-06 19:24:33.808 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 19:24:33.808 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-06 19:58:52.262 | INFO     | main:lifespan:69 - ready: user=groupchat_0ecb115c thread=thread_groupchat_87a65494
+2025-10-06 19:58:52.263 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-06 19:58:53.299 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-06 20:02:44.138 | INFO     | main:lifespan:87 - shutdown: ok
