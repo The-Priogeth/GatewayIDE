@@ -7,6 +7,8 @@
         Width="1280" Height="800"
         Title="Gateway IDE">
 
+
+
   <!-- Root Grid: Topbar + Content -->
   <Grid RowDefinitions="Auto,*">
 
@@ -51,12 +53,12 @@
 
           <!-- Chat-Output -->
           <TextBox Grid.Row="0"
-                   Text="{Binding ChatBuffer}"
-                   TextWrapping="Wrap"
-                   FontFamily="Consolas, Menlo, monospace"
-                   IsReadOnly="True"
-                   AcceptsReturn="True"
-                   ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  Text="{Binding ChatBuffer}"
+                  TextWrapping="Wrap"
+                  FontFamily="Consolas, Menlo, monospace"
+                  IsReadOnly="True"
+                  AcceptsReturn="True"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
           <!-- Chat-Eingabe -->
           <StackPanel Grid.Row="1" Spacing="6">
@@ -70,65 +72,129 @@
       <!-- Main workspace -->
       <Grid Grid.Column="1">
 
-        <!-- DASHBOARD: Buttons oben (2/3), Terminal unten (1/3) -->
-        <Grid RowDefinitions="2*,*" IsVisible="{Binding IsDashboard}">
-          <!-- Buttons -->
-          <ScrollViewer Grid.Row="0">
-            <WrapPanel Margin="12" ItemHeight="40" ItemWidth="180">
-              <!-- Nur noch Mega-Node hier -->
-              <Button Content="Start Mega-Node" Command="{Binding StartMeganodeCommand}" />
-            </WrapPanel>
-          </ScrollViewer>
+        <!-- DASHBOARD: oben (Buttons + Status ⇢ 75%/25%), unten Terminal -->
+        <Grid RowDefinitions="2*,*"
+              IsVisible="{Binding IsDashboard}">
 
-          <!-- Terminal (nur Dashboard) -->
+          <!-- OBERER TEIL: Buttons (links, 75%) + Status (rechts, 25%) -->
+          <Grid Grid.Row="0" ColumnDefinitions="3*,1*">
+            <!-- Buttons links -->
+            <ScrollViewer Grid.Column="0">
+              <WrapPanel Margin="12" ItemHeight="40" ItemWidth="180">
+                <Button Content="Start Mega-Node" Command="{Binding StartMeganodeCommand}" />
+              </WrapPanel>
+            </ScrollViewer>
+
+            <!-- System Status rechts (nimmt 25%) -->
+            <Border Grid.Column="1"
+                    Margin="12,0,12,8"
+                    Padding="12"
+                    Background="#222"
+                    HorizontalAlignment="Right"
+                    CornerRadius="8">
+              <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                <TextBlock Grid.ColumnSpan="2"
+                          Text="System Status"
+                          FontWeight="Bold"
+                          Margin="0,0,0,8"/>
+
+                <!-- NEU: Docker Desktop -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Docker Desktop:" Margin="0,0,8,4"/>
+                <TextBlock Grid.Row="1" Grid.Column="1"
+                          Text="{Binding DockerDesktopStatus}"
+                          Foreground="{Binding DockerDesktopStatusBrush}"/>
+
+                <!-- Image -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Docker Image Status:" Margin="0,0,8,4"/>
+                <TextBlock Grid.Row="2" Grid.Column="1"
+                          Text="{Binding DockerImageStatus}"
+                          Foreground="{Binding DockerImageStatusBrush}"/>
+
+                <!-- Container -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Docker Container:" Margin="0,0,8,0"/>
+                <TextBlock Grid.Row="3" Grid.Column="1"
+                          Text="{Binding DockerContainerStatus}"
+                          Foreground="{Binding DockerContainerStatusBrush}"/>
+              </Grid>
+
+            </Border>
+          </Grid>
+
+          <!-- Terminal unten -->
           <Border Grid.Row="1" Margin="8" BorderBrush="#7a29ff" BorderThickness="2">
             <TextBox Text="{Binding TerminalBuffer}"
-                     TextWrapping="Wrap"
-                     FontFamily="Consolas, Menlo, monospace"
-                     IsReadOnly="True"
-                     AcceptsReturn="True"
-                     Background="#0b0b0b"
-                     Foreground="#d8d8d8"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    TextWrapping="Wrap"
+                    FontFamily="Consolas, Menlo, monospace"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    Background="#0b0b0b"
+                    Foreground="#d8d8d8"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
           </Border>
         </Grid>
 
-        <!-- DOCKER: Buttonleiste + zwei Terminals (stdout | stderr) -->
+        <!-- DOCKER: Buttonleiste + 2 Terminals oben + 1 Terminal unten -->
         <Grid IsVisible="{Binding IsDocker}" RowDefinitions="Auto,*" Margin="8">
           <!-- Buttonleiste -->
           <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
-            <Button Content="Rebuild (wipe + build + up)" Command="{Binding RebuildGatewayCommand}" />
-            <Button Content="Start" Command="{Binding StartGatewayCommand}" />
-            <Button Content="Stop" Command="{Binding StopGatewayCommand}" />
+            <Button Content="Rebuild (wipe + build)" Command="{Binding RebuildGatewayCommand}" />
+            <Button Content="Start(up)" Command="{Binding StartGatewayCommand}" />
+            <Button Content="Stop(down)" Command="{Binding StopGatewayCommand}" />
+            <Button Content="Remove container" Command="{Binding RemoveGatewayContainerCommand}" />
+
           </StackPanel>
 
-          <!-- zwei Terminals 50/50 -->
-          <Grid Grid.Row="1" ColumnDefinitions="*,8,*">
-            <Border Grid.Column="0" BorderBrush="#444" BorderThickness="1">
-              <TextBox Text="{Binding DockerOutBuffer}"
-                       TextWrapping="Wrap"
-                       FontFamily="Consolas, Menlo, monospace"
-                       IsReadOnly="True"
-                       AcceptsReturn="True"
-                       Background="#0b0b0b"
-                       Foreground="#d8d8d8"
-                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
+          <!-- Terminals: oben 50/50, unten 50/100 -->
+          <Grid Grid.Row="1" RowDefinitions="*,8,*">
+            <!-- OBERER BLOCK: 2 Spalten (Out | Err) -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,8,*">
+              <Border Grid.Column="0" BorderBrush="#444" BorderThickness="1">
+                <TextBox x:Name="DockerOutBox"
+                        Text="{Binding DockerOutBuffer}"
+                        CaretIndex="{Binding Text.Length, ElementName=DockerOutBox}"
+                        TextWrapping="Wrap"
+                        FontFamily="Consolas, Menlo, monospace"
+                        IsReadOnly="True"
+                        AcceptsReturn="True"
+                        Background="#0b0b0b"
+                        Foreground="#d8d8d8"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+              </Border>
 
-            <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1">
-              <TextBox Text="{Binding DockerErrBuffer}"
-                       TextWrapping="Wrap"
-                       FontFamily="Consolas, Menlo, monospace"
-                       IsReadOnly="True"
-                       AcceptsReturn="True"
-                       Background="#0b0b0b"
-                       Foreground="#d8d8d8"
-                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+              <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1">
+                <TextBox x:Name="DockerErrBox"
+                        Text="{Binding DockerErrBuffer}"
+                        CaretIndex="{Binding Text.Length, ElementName=DockerErrBox}"
+                        TextWrapping="Wrap"
+                        FontFamily="Consolas, Menlo, monospace"
+                        IsReadOnly="True"
+                        AcceptsReturn="True"
+                        Background="#0b0b0b"
+                        Foreground="#d8d8d8"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+              </Border>
+            </Grid>
+
+            <!-- UNTERER BLOCK: 1 Spalte (Gateway-Container Runtime-Logs) -->
+            <Border Grid.Row="2" BorderBrush="#444" BorderThickness="1">
+              <TextBox x:Name="GatewayLogBox"
+                      Text="{Binding GatewayLogBuffer}"
+                      CaretIndex="{Binding Text.Length, ElementName=GatewayLogBox}"
+                      TextWrapping="Wrap"
+                      FontFamily="Consolas, Menlo, monospace"
+                      IsReadOnly="True"
+                      AcceptsReturn="True"
+                      Background="#0b0b0b"
+                      Foreground="#d8d8d8"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
             </Border>
           </Grid>
         </Grid>
 
       </Grid>
     </Grid>
+
   </Grid>
 </Window>
+
+    

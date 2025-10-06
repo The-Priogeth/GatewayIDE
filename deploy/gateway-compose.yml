@@ -1,6 +1,4 @@
-version: "3.9"
 services:
-
   meganode:
     image: alpine:3.20
     container_name: gateway-meganode
@@ -10,20 +8,30 @@ services:
   gateway:
     container_name: gateway-container
     build:
-      context: ../               # Repo-Root (Dockerfile & Code sichtbar)
+      context: ../
       dockerfile: deploy/scripts/Dockerfile.ai
     env_file:
       - ../.env
     ports:
       - "8080:8080"
-    restart: unless-stopped
-    working_dir: /app
-    command: >
-      bash -lc "uvicorn main:app --host 0.0.0.0 --port 8080 --no-access-log"
+    restart: no
+    working_dir: /app/backend
+    # WICHTIG: zuerst der Code-Bind-Mount, dann .venv-Volume (überschreibt Unterordner)
+    environment:
+      - PYTHONPATH=/app
     volumes:
-      - ../:/app                 # Dev-Workflow: Live-Code im Container
+      - ../:/app
+      - venv-cache:/app/.venv
+    # Beim Start sicherstellen, dass die venv existiert
+    command: >
+      bash -lc "pwd; ls -la; python -c 'import sys,os;print(os.getcwd());print(sys.path[:3])';
+                uv sync --frozen || uv sync;
+                uv run uvicorn main:app --host 0.0.0.0 --port 8080 --no-access-log"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/docs"]
       interval: 10s
       timeout: 3s
-      retries: 10
+      retries: 3
+
+volumes:
+  venv-cache:
