@@ -1,0 +1,240 @@
+2025-10-13 21:34:31.879 | INFO     | backend.main:_hotreload_probe:148 - 🔍 HR[startup] t=21:34:31
+  taskmanager: mod_id=140231048406224 mod=/app/backend/agent_core/managers/taskmanager.py mtime=21:06:56 sha=b70686b83aa1 | code=/app/backend/agent_core/managers/taskmanager.py:110 cmtime=21:06:56 csha=b70686b83aa1
+  librarian: mod_id=140231048407024 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=140231048408464 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 21:34:31.879 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_7f535901 thread=thread_groupchat_ec57c5ae
+2025-10-13 21:34:31.881 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 21:34:31.881 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 21:48:40.043 | INFO     | backend.main:_hotreload_probe:148 - 🔍 HR[startup] t=21:48:40
+  taskmanager: mod_id=139924881827024 mod=/app/backend/agent_core/managers/taskmanager.py mtime=21:06:56 sha=b70686b83aa1 | code=/app/backend/agent_core/managers/taskmanager.py:110 cmtime=21:06:56 csha=b70686b83aa1
+  librarian: mod_id=139924881827824 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139924881829264 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 21:48:40.043 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_a50be468 thread=thread_groupchat_f0666c0d
+2025-10-13 21:48:40.045 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 21:48:40.896 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 21:54:56.139 | INFO     | backend.main:_hotreload_probe:148 - 🔍 HR[startup] t=21:54:56
+  taskmanager: mod_id=140161512989664 mod=/app/backend/agent_core/managers/taskmanager.py mtime=21:06:56 sha=b70686b83aa1 | code=/app/backend/agent_core/managers/taskmanager.py:110 cmtime=21:06:56 csha=b70686b83aa1
+  librarian: mod_id=140161512990464 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=140161512991904 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 21:54:56.140 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_92eeca7f thread=thread_groupchat_6ceace51
+2025-10-13 21:54:56.142 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 21:54:56.142 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:05:10.495 | INFO     | backend.main:_hotreload_probe:148 - 🔍 HR[startup] t=22:05:10
+  taskmanager: mod_id=140329979476896 mod=/app/backend/agent_core/managers/taskmanager.py mtime=21:06:56 sha=b70686b83aa1 | code=/app/backend/agent_core/managers/taskmanager.py:110 cmtime=21:06:56 csha=b70686b83aa1
+  librarian: mod_id=140329979477696 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=140329977398432 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 22:05:10.495 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_2cd27bae thread=thread_groupchat_5d35aa97
+2025-10-13 22:05:10.497 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:05:10.497 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:05:15.604 | INFO     | backend.main:_hotreload_probe:148 - 🔍 HR[request] t=22:05:15
+  taskmanager: mod_id=140329979476896 mod=/app/backend/agent_core/managers/taskmanager.py mtime=21:06:56 sha=b70686b83aa1 | code=/app/backend/agent_core/managers/taskmanager.py:110 cmtime=21:06:56 csha=b70686b83aa1
+  librarian: mod_id=140329979477696 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=140329977398432 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 22:14:51.079 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 22:14:51.880 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:14:57.102 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_db57b8d6 thread=thread_groupchat_7b2ac4fc
+2025-10-13 22:14:57.104 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:14:57.104 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:15:16.918 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:18:08.947 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_459fbf27 thread=thread_groupchat_616cff14
+2025-10-13 22:18:08.949 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:18:08.949 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:25:50.451 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_bce0bb20 thread=thread_groupchat_2cb1f958
+2025-10-13 22:25:50.452 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:25:50.452 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:30:10.848 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 22:30:16.094 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_e8f0daf2 thread=thread_groupchat_7e044537
+2025-10-13 22:30:16.097 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:30:16.097 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:31:14.858 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.deleted: 3>, '/app/backend/society_of_mind_agent.py')}
+2025-10-13 22:31:15.158 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend')}
+2025-10-13 22:31:15.659 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:31:20.030 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_d77dfd5d thread=thread_groupchat_89ce993d
+2025-10-13 22:31:20.031 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:31:20.031 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:42:21.028 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 22:42:26.379 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_d647b1b6 thread=thread_groupchat_0f7ec655
+2025-10-13 22:42:26.381 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:42:26.381 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:42:45.645 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:42:58.804 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_a52327a8 thread=thread_groupchat_34436061
+2025-10-13 22:42:58.805 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:42:58.805 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:45:43.819 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 22:45:44.070 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:45:48.625 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_9d99d594 thread=thread_groupchat_e7d41ea2
+2025-10-13 22:45:48.627 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:45:48.627 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:49:10.069 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:49:14.763 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_e6f45c95 thread=thread_groupchat_f7faf5dd
+2025-10-13 22:49:14.764 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:49:14.764 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:53:30.670 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 22:53:30.871 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:53:35.663 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_362ac841 thread=thread_groupchat_6274e79a
+2025-10-13 22:53:35.665 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:53:35.665 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 22:54:04.946 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 22:54:13.677 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_5335dbef thread=thread_groupchat_931bf5ad
+2025-10-13 22:54:13.678 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 22:54:13.678 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 23:35:15.091 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 23:35:16.442 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 23:35:20.550 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_4063e016 thread=thread_groupchat_b57059c4
+2025-10-13 23:35:20.551 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 23:35:21.494 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 23:35:37.588 | WARNING  | backend.agent_core.managers.librarian:generate_reply:63 - 📚 [LIBRARIAN] generate_reply() ACTIVE
+2025-10-13 23:35:38.653 | WARNING  | backend.agent_core.managers.librarian:generate_reply:84 - 📚 [LIBRARIAN] reply_type=str
+2025-10-14 00:48:48.301 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/librarian.py')}
+2025-10-14 00:48:48.502 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-14 00:48:52.893 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_86a2ea5f thread=thread_groupchat_6b6fe463
+2025-10-14 00:48:52.895 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-14 00:49:01.728 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_c0a179b0 thread=thread_groupchat_f3d42337
+2025-10-14 00:49:01.730 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-14 00:49:01.730 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-14 00:49:11.854 | WARNING  | backend.agent_core.managers.librarian:generate_reply:62 - 📚 [LIBRARIAN] generate_reply() ACTIVE
+2025-10-14 00:49:13.140 | WARNING  | backend.agent_core.managers.librarian:generate_reply:83 - 📚 [LIBRARIAN] reply_type=str
+2025-10-14 00:49:16.484 | WARNING  | backend.main:chat_endpoint:166 - sig-check failed: 'NoneType' object has no attribute 'agents'
+2025-10-14 01:00:14.860 | INFO     | backend.main:lifespan:68 - ✅ Runtime ready: user=groupchat_2abe9480 thread=thread_groupchat_fd4db812
+2025-10-14 01:00:14.862 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-14 01:00:14.862 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-14 01:01:02.440 | INFO     | backend.main:chat_endpoint:161 - Agent=TaskManager gen_reply_sig=('self', 'messages', 'sender') file=/app/backend/agent_core/managers/taskmanager.py line=164
+2025-10-14 01:01:02.440 | INFO     | backend.main:chat_endpoint:161 - Agent=Librarian gen_reply_sig=('self', 'messages', 'sender', 'config') file=/app/backend/agent_core/managers/librarian.py line=60
+2025-10-14 01:01:02.440 | INFO     | backend.main:chat_endpoint:161 - Agent=Trainer gen_reply_sig=('self', 'messages', 'sender', 'config') file=/app/backend/agent_core/managers/trainer.py line=44
+2025-10-14 01:01:02.583 | INFO     | backend.main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-20 16:08:30.878 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_9ebd05 T2=thread_t2_user_visible_25dbf9 T3=thread_t3_meta_proto_07f47b T4=thread_t4_lib_internal_83c38b T5=thread_t5_task_internal_ce98a9 T6=thread_t6_trn_internal_003599
+2025-10-20 16:08:30.880 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-20 16:08:30.880 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 01:42:49.629 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_944939 T2=thread_t2_user_visible_56e914 T3=thread_t3_meta_proto_71dc18 T4=thread_t4_lib_internal_ca7bf9 T5=thread_t5_task_internal_721383 T6=thread_t6_trn_internal_dc8b3b
+2025-10-21 01:42:49.631 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 01:42:49.631 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 01:43:18.809 | INFO     | backend.agent_core.konstruktor:_log:179 - [INPUT] → user: Halle?
+2025-10-21 01:43:20.348 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoTherapist] Fehler: too many values to unpack (expected 2)
+2025-10-21 01:43:20.348 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoProgrammer] Fehler: too many values to unpack (expected 2)
+2025-10-21 01:43:20.963 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoStrategist] Fehler: too many values to unpack (expected 2)
+2025-10-21 01:43:20.964 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoCritic] Fehler: too many values to unpack (expected 2)
+2025-10-21 02:01:35.689 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_f90223 T2=thread_t2_user_visible_d55037 T3=thread_t3_meta_proto_2fc017 T4=thread_t4_lib_internal_bb1b06 T5=thread_t5_task_internal_264c53 T6=thread_t6_trn_internal_0550a0
+2025-10-21 02:01:35.691 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 02:01:35.691 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 02:15:26.141 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_55f597 T2=thread_t2_user_visible_e78fd2 T3=thread_t3_meta_proto_88f088 T4=thread_t4_lib_internal_c68d76 T5=thread_t5_task_internal_342fd9 T6=thread_t6_trn_internal_6bdd1e
+2025-10-21 02:15:26.144 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 02:15:26.144 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 02:15:29.165 | INFO     | backend.agent_core.konstruktor:_log:179 - [INPUT] → user: tests
+2025-10-21 02:15:30.682 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoTherapist] Fehler: too many values to unpack (expected 2)
+2025-10-21 02:15:30.883 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoProgrammer] Fehler: too many values to unpack (expected 2)
+2025-10-21 02:15:31.802 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoStrategist] Fehler: too many values to unpack (expected 2)
+2025-10-21 02:15:31.802 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoCritic] Fehler: too many values to unpack (expected 2)
+2025-10-21 03:33:45.068 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_f62978 T2=thread_t2_user_visible_437d34 T3=thread_t3_meta_proto_8bee29 T4=thread_t4_lib_internal_c1a207 T5=thread_t5_task_internal_9fc117 T6=thread_t6_trn_internal_bab589
+2025-10-21 03:33:45.071 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 03:33:45.071 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 03:33:54.542 | INFO     | backend.agent_core.konstruktor:_log:179 - [INPUT] → user: test
+2025-10-21 03:33:55.949 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoTherapist] Fehler: too many values to unpack (expected 2)
+2025-10-21 03:33:55.961 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoProgrammer] Fehler: too many values to unpack (expected 2)
+2025-10-21 03:33:55.961 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoStrategist] Fehler: too many values to unpack (expected 2)
+2025-10-21 03:33:56.384 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoCritic] Fehler: too many values to unpack (expected 2)
+2025-10-21 04:54:30.073 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_87a2d1 T2=thread_t2_user_visible_c7258c T3=thread_t3_meta_proto_f7f515 T4=thread_t4_lib_internal_b8b31b T5=thread_t5_task_internal_bb0e99 T6=thread_t6_trn_internal_d7164f
+2025-10-21 04:54:30.077 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 04:54:30.077 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 04:54:46.597 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 04:54:55.321 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_2f6289 T2=thread_t2_user_visible_52ef13 T3=thread_t3_meta_proto_9214db T4=thread_t4_lib_internal_59d346 T5=thread_t5_task_internal_9a7bbe T6=thread_t6_trn_internal_e89a05
+2025-10-21 04:54:55.324 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 04:54:55.324 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 05:30:12.307 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_d43da8 T2=thread_t2_user_visible_ad6465 T3=thread_t3_meta_proto_d8f8d3 T4=thread_t4_lib_internal_4b3044 T5=thread_t5_task_internal_824982 T6=thread_t6_trn_internal_be91e9
+2025-10-21 05:30:12.309 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 05:30:12.309 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 05:30:24.250 | INFO     | backend.agent_core.konstruktor:_log:179 - [INPUT] → user: test
+2025-10-21 05:30:25.745 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoTherapist] Fehler: too many values to unpack (expected 2)
+2025-10-21 05:30:25.847 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoProgrammer] Fehler: too many values to unpack (expected 2)
+2025-10-21 05:30:25.847 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoStrategist] Fehler: too many values to unpack (expected 2)
+2025-10-21 05:30:27.258 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoCritic] Fehler: too many values to unpack (expected 2)
+2025-10-21 06:06:11.809 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_0ffdce T2=thread_t2_user_visible_ea70f1 T3=thread_t3_meta_proto_a5720d T4=thread_t4_lib_internal_a30dd5 T5=thread_t5_task_internal_99fe75 T6=thread_t6_trn_internal_84a938
+2025-10-21 06:06:11.812 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:06:11.812 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:07:24.919 | INFO     | backend.agent_core.konstruktor:_log:179 - [INPUT] → user: test
+2025-10-21 06:07:26.376 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoTherapist] Fehler: too many values to unpack (expected 2)
+2025-10-21 06:07:26.582 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoProgrammer] Fehler: too many values to unpack (expected 2)
+2025-10-21 06:07:26.582 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoStrategist] Fehler: too many values to unpack (expected 2)
+2025-10-21 06:07:26.582 | WARNING  | backend.agent_core.konstruktor:_parallel_demo:62 - [DEMO:DemoCritic] Fehler: too many values to unpack (expected 2)
+2025-10-21 06:10:47.091 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/hma_config.py')}
+2025-10-21 06:10:54.477 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_3db13f T2=thread_t2_user_visible_0289bf T3=thread_t3_meta_proto_1ef554 T4=thread_t4_lib_internal_2bb1db T5=thread_t5_task_internal_6f844c T6=thread_t6_trn_internal_7b7775
+2025-10-21 06:10:54.480 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:10:54.480 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:12:07.881 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 06:12:15.062 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_ca2db7 T2=thread_t2_user_visible_3974d0 T3=thread_t3_meta_proto_381575 T4=thread_t4_lib_internal_368868 T5=thread_t5_task_internal_d9ec88 T6=thread_t6_trn_internal_d13450
+2025-10-21 06:12:15.064 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:12:15.064 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:14:05.251 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/bootstrap.py')}
+2025-10-21 06:14:05.352 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 06:14:12.079 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_11ea3b T2=thread_t2_user_visible_fb62a0 T3=thread_t3_meta_proto_ead4bc T4=thread_t4_lib_internal_d94bf3 T5=thread_t5_task_internal_dfc1a3 T6=thread_t6_trn_internal_4c634f
+2025-10-21 06:14:12.081 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:14:12.081 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:14:21.679 | INFO     | backend.agent_core.konstruktor:_log:188 - [INPUT] → user: test
+2025-10-21 06:14:30.979 | INFO     | backend.agent_core.konstruktor:_log:188 - [SOM:ich] → assistant: Ich freue mich, Ihnen behilflich sein zu können. Bitte lassen Sie mich wissen, wobei genau Sie Unterstützung benötigen, damit wir gemeinsam die nächsten Schritte planen können. Wenn es spezifische Auf...
+2025-10-21 06:24:01.411 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/konstruktor.py')}
+2025-10-21 06:24:01.561 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 06:24:08.468 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_024216 T2=thread_t2_user_visible_0820be T3=thread_t3_meta_proto_35cb5b T4=thread_t4_lib_internal_2e7798 T5=thread_t5_task_internal_2a763e T6=thread_t6_trn_internal_239559
+2025-10-21 06:24:08.470 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:24:08.470 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:24:27.089 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: Hey, sag mal kennst du meinen namen?
+2025-10-21 06:24:30.294 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Nein, ich kenne deinen Namen nicht, da du ihn mir nicht mitgeteilt hast. Falls du etwas anderes wissen möchtest, lass es mich wissen. | deliver_to=user
+2025-10-21 06:28:55.188 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 06:29:02.133 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_ca632b T2=thread_t2_user_visible_da718e T3=thread_t3_meta_proto_9630fd T4=thread_t4_lib_internal_65a491 T5=thread_t5_task_internal_cbbc46 T6=thread_t6_trn_internal_7e477a
+2025-10-21 06:29:02.135 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:29:02.135 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:29:13.463 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: ich heiße aaron
+2025-10-21 06:29:18.039 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Ich bin hier, um dir zu helfen, Aaron. Gibt es ein spezielles Thema oder eine Frage, bei der ich dich unterstützen kann? | deliver_to=user
+2025-10-21 06:39:03.178 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_0ebe0d T2=thread_t2_user_visible_6f39f9 T3=thread_t3_meta_proto_8477db T4=thread_t4_lib_internal_5b8a20 T5=thread_t5_task_internal_accab5 T6=thread_t6_trn_internal_90e9f2
+2025-10-21 06:39:03.180 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 06:39:03.181 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 06:39:10.746 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: kannst du ddich noch an meinen namen erinnern?
+2025-10-21 06:39:15.761 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Es tut mir leid, aber ich kann mich nicht an Ihren Namen erinnern, da ich keine persönlichen Daten speichere. Wenn Sie mir Ihren Namen erneut mitteilen, kann ich ihn im aktuellen Kontext verwenden. | ...
+2025-10-21 06:46:34.252 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: mein name ist aaron
+2025-10-21 06:46:37.471 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Hallo Aaron, ich kann mich leider nicht an deinen Namen erinnern, da ich keine persönlichen Daten speichere. Wie kann ich dir heute weiterhelfen? | deliver_to=user
+2025-10-21 06:46:49.397 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: wie lautet mein name?
+2025-10-21 06:46:51.698 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Dein Name ist Aaron, aber ich kann ihn mir nicht merken, da ich keine langfristige Speicherung unterstütze. | deliver_to=user
+2025-10-21 07:00:30.271 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/konstruktor.py')}
+2025-10-21 07:00:30.422 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 07:00:37.796 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_29fe3f T2=thread_t2_user_visible_91bd69 T3=thread_t3_meta_proto_333dc6 T4=thread_t4_lib_internal_a500c3 T5=thread_t5_task_internal_db3a4c T6=thread_t6_trn_internal_e4e2fe
+2025-10-21 07:00:37.798 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:00:37.798 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:00:45.803 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_b91b1b T2=thread_t2_user_visible_983bd6 T3=thread_t3_meta_proto_4bbef8 T4=thread_t4_lib_internal_dbf30a T5=thread_t5_task_internal_ce189b T6=thread_t6_trn_internal_7c5233
+2025-10-21 07:00:45.805 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:00:45.805 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:04:10.748 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/konstruktor.py')}
+2025-10-21 07:04:10.900 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 07:04:17.853 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_e03a60 T2=thread_t2_user_visible_5b48f5 T3=thread_t3_meta_proto_1dfcdf T4=thread_t4_lib_internal_543349 T5=thread_t5_task_internal_a0ab14 T6=thread_t6_trn_internal_af3094
+2025-10-21 07:04:17.855 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:04:17.855 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:05:44.168 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_405395 T2=thread_t2_user_visible_3533e7 T3=thread_t3_meta_proto_c212f5 T4=thread_t4_lib_internal_05f597 T5=thread_t5_task_internal_649cbc T6=thread_t6_trn_internal_2bf49c
+2025-10-21 07:05:44.170 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:05:44.170 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:05:55.274 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: wie lautet mein name?
+2025-10-21 07:05:57.440 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Mein Name lautet „T1_ROOT Channel“. | deliver_to=user
+2025-10-21 07:05:57.440 | WARNING  | backend.agent_core.konstruktor:step:242 - [SOM:T2] Persist-Problem: 'MessagingRouter' object has no attribute '_persist_sink'
+2025-10-21 07:14:52.878 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/messaging.py')}
+2025-10-21 07:14:53.079 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 07:15:00.289 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_4288ce T2=thread_t2_user_visible_bcec85 T3=thread_t3_meta_proto_893fd0 T4=thread_t4_lib_internal_750db4 T5=thread_t5_task_internal_fa5c2e T6=thread_t6_trn_internal_d51dbc
+2025-10-21 07:15:00.292 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:15:00.292 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:15:44.070 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: wie lautet mein name und wie lautet dein name?
+2025-10-21 07:15:46.729 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Ich kenne deinen Namen nicht, aber mein Name ist SOM. | deliver_to=user
+2025-10-21 07:20:51.912 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_7bb254 T2=thread_t2_user_visible_b0bbd2 T3=thread_t3_meta_proto_94acd9 T4=thread_t4_lib_internal_0e4081 T5=thread_t5_task_internal_1102c4 T6=thread_t6_trn_internal_53b662
+2025-10-21 07:20:51.914 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:21:00.043 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_a78abd T2=thread_t2_user_visible_90a071 T3=thread_t3_meta_proto_5e5232 T4=thread_t4_lib_internal_d88105 T5=thread_t5_task_internal_241cda T6=thread_t6_trn_internal_5be86c
+2025-10-21 07:21:00.045 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:21:00.045 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:21:04.545 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-21 07:23:04.233 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_94b127 T2=thread_t2_user_visible_16030e T3=thread_t3_meta_proto_9601ec T4=thread_t4_lib_internal_5a1d44 T5=thread_t5_task_internal_dbfdbe T6=thread_t6_trn_internal_91372c
+2025-10-21 07:23:04.235 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 07:23:04.235 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 07:23:20.395 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: wie heißt du und wie heiße ich?
+2025-10-21 07:23:23.444 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Ich habe keinen eigenen Namen, da ich ein KI-Modell von OpenAI bin. Du heißt T1_ROOT Channel. | deliver_to=user
+2025-10-21 10:15:44.572 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/messaging.py')}
+2025-10-21 10:15:52.465 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_2e04e7 T2=thread_t2_user_visible_7c8842 T3=thread_t3_meta_proto_3908ef T4=thread_t4_lib_internal_18cde9 T5=thread_t5_task_internal_e2d625 T6=thread_t6_trn_internal_9cf60a
+2025-10-21 10:15:52.467 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 10:15:52.467 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 10:20:51.543 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_f0d5b4 T2=thread_t2_user_visible_ec8ad5 T3=thread_t3_meta_proto_fb2b4b T4=thread_t4_lib_internal_3dcb13 T5=thread_t5_task_internal_1d68d3 T6=thread_t6_trn_internal_2ad489
+2025-10-21 10:20:51.546 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-21 10:20:51.546 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-21 10:21:16.530 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: hi
+2025-10-21 10:21:19.509 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Hallo! Wie kann ich Ihnen heute helfen? Gibt es ein bestimmtes Thema oder Anliegen, bei dem ich unterstützen kann? | deliver_to=user

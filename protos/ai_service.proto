@@ -1,6 +1,6 @@
 syntax = "proto3";
-package gateway.ai.v1;
 
+package gateway.ai.v1;
 option csharp_namespace = "Gateway.AI.V1";
 
 service AIService {

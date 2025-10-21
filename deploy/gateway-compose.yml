@@ -15,23 +15,17 @@ services:
     ports:
       - "8080:8080"
     restart: no
-    working_dir: /app/backend
-    # WICHTIG: zuerst der Code-Bind-Mount, dann .venv-Volume (überschreibt Unterordner)
+    working_dir: /app
     environment:
       - PYTHONPATH=/app
+      - WATCHFILES_FORCE_POLLING=1
+      - PYTHONDONTWRITEBYTECODE=1
     volumes:
       - ../:/app
       - venv-cache:/app/.venv
-    # Beim Start sicherstellen, dass die venv existiert
     command: >
-      bash -lc "pwd; ls -la; python -c 'import sys,os;print(os.getcwd());print(sys.path[:3])';
-                uv sync --frozen || uv sync;
-                uv run uvicorn main:app --host 0.0.0.0 --port 8080 --no-access-log"
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/docs"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
+      bash -lc 'uv sync --frozen || uv sync; uv run uvicorn backend.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir /app/backend --reload-include "*.py" --no-access-log'
+
 
 volumes:
   venv-cache:

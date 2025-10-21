@@ -20,5 +20,10 @@ public sealed class AIClientService : IAsyncDisposable
         return reply.Text;
     }
 
-    public async ValueTask DisposeAsync() => await _channel.ShutdownAsync();
+    // ShutdownAsync gibt es bei Grpc.Net.Client nicht – Dispose genügt
+    public ValueTask DisposeAsync()
+    {
+        _channel.Dispose();
+        return ValueTask.CompletedTask;
+    }
 }

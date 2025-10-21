@@ -1,23 +1,23 @@
-# backend/main.py — FastAPI entrypoint (Lobby/Manager driven chat)
+# backend/main.py — FastAPI entrypoint (HMA v2 kompatibel)
 from __future__ import annotations
-
-import os
-import time
+import os, time
 from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Optional, Callable, Awaitable, cast
+from typing import cast
 from loguru import logger
 from fastapi import FastAPI
 from pydantic import BaseModel
+
+from autogen_core.memory import MemoryContent, MemoryMimeType
+
 from backend import bootstrap
 from backend.routes.websocket import start_watcher
-from backend.ag2.autogen.agentchat import UserProxyAgent
 
-# -----------------------------------------------------------------------------
-# Environment basics
-# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------#
+# 🌍 Environment / Logging Setup
+# -----------------------------------------------------------------------------#
 os.environ.setdefault("TZ", "Europe/Berlin")
-# Avoid static attribute access (Pylance: time.tzset may not exist on Windows)
 _tzset = getattr(time, "tzset", None)
 if callable(_tzset):
     _tzset()
@@ -27,15 +27,6 @@ LOG_ROTATION = os.getenv("LOG_ROTATION", "25 MB")
 LOG_RETENTION = os.getenv("LOG_RETENTION")  # None → keep forever
 LOG_DIAGNOSE = os.getenv("LOG_DIAGNOSE", "true").lower() == "true"
 
-CORS_ALLOW_ORIGINS_RAW = os.getenv("CORS_ALLOW_ORIGINS", "*")
-if CORS_ALLOW_ORIGINS_RAW.strip() == "*":
-    CORS_ALLOW_ORIGINS = ["*"]
-    CORS_ALLOW_CREDENTIALS = False  # Wildcard + credentials is not allowed by spec
-else:
-    CORS_ALLOW_ORIGINS = [o.strip() for o in CORS_ALLOW_ORIGINS_RAW.split(",") if o.strip()]
-    CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "true").lower() == "true"
-
-# File logging sink (best effort)
 try:
     os.makedirs(LOG_PATH, exist_ok=True)
     logger.add(
@@ -47,128 +38,125 @@ try:
         enqueue=True,
     )
 except Exception:
-    # Logging should never block startup
     pass
 
-# -----------------------------------------------------------------------------
-# Lifespan: initialize once (runtime, captains, lobby manager) and cleanup on exit
-# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------#
+# ⚙️ Lifespan: Runtime initialisieren
+# -----------------------------------------------------------------------------#
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Initialisiert beim App-Start das gesamte Laufzeitsystem:
+    - Lädt Keys & Modelle über bootstrap.ensure_runtime()
+    - Erstellt Zep-Client, Threads T1..T6, HMA, ContextProvider, Messaging
+    - Startet Dateiwächter für Hot-Reload (optional)
+    """
     runtime = await bootstrap.ensure_runtime()
 
-    # Make runtime easily accessible to routes
-    app.state.runtime = runtime
-    app.state.zep_client = runtime.zep_client
-    app.state.user_id = runtime.user_id
-    app.state.thread_id = runtime.thread_id
-    app.state.lobby = runtime.lobby
-    app.state.memory = runtime.memory
-    app.state.mem_thread = runtime.mem_thread
-    
-    logger.info("ready: user={} thread={}", app.state.user_id, app.state.thread_id)
+    # Gemeinsamer App-State für alle Endpoints
+    app.state.runtime       = runtime
+    app.state.zep_client    = runtime.zep_client
 
-    watcher_thread = None
-    watcher_stop = None
+    # Threads/Memories (Naming aus bootstrap.ensure_runtime)
+    app.state.t1_thread_id  = runtime.t1_thread_id
+    app.state.t1_memory     = runtime.t1_memory
+    app.state.t2_thread_id  = runtime.t2_thread_id
+    app.state.t3_thread_id  = runtime.t3_thread_id
+    app.state.t4_thread_id  = runtime.t4_thread_id
+    app.state.t5_thread_id  = runtime.t5_thread_id
+    app.state.t6_thread_id  = runtime.t6_thread_id
+
+    app.state.ctx_provider  = runtime.ctx_provider
+    app.state.hma_pack      = runtime.hma               # dict: {"hma": HauptMetaAgent, "context_provider": ...}
+    app.state.messaging     = runtime.messaging
+    app.state.pbuffer_dir   = runtime.pbuffer_dir
+
+    logger.info(
+        "✅ Runtime ready | T1={} T2={} T3={} T4={} T5={} T6={}",
+        app.state.t1_thread_id, app.state.t2_thread_id, app.state.t3_thread_id,
+        app.state.t4_thread_id, app.state.t5_thread_id, app.state.t6_thread_id
+    )
+
+    watcher_thread = watcher_stop = None
     try:
         backend_dir = str(Path(__file__).resolve().parent)
         watcher_thread, watcher_stop = start_watcher(path=backend_dir)
         yield
     finally:
         try:
-            if watcher_stop is not None:
-                watcher_stop.set()          # beendet watchfiles-Iterator
-            if watcher_thread is not None:
-                watcher_thread.join(timeout=5)
+            if watcher_stop: watcher_stop.set()
+            if watcher_thread: watcher_thread.join(timeout=5)
         except Exception:
             pass
+        logger.info("🧹 Shutdown complete.")
 
-        # (ZEP shutdown …)
-        logger.info("shutdown: ok")
-        # test
 
-# -----------------------------------------------------------------------------
-# App factory & middleware
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 🚀 FastAPI App-Definition
+# -----------------------------------------------------------------------------#
 app: FastAPI = FastAPI(
     lifespan=lifespan,
     title="Gateway API",
-    description="Modulare KI-Agentenplattform (Lobby/Manager-Chat)",
-    version="0.5",
+    description="Modulare KI-Agentenplattform (HMA mit innerem SOM und direkter Funktionsansprache)",
+    version="2.12",
 )
 
 
-# -----------------------------------------------------------------------------
-# Chat API (Manager-driven): feed prompt into the lobby and let the manager route
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------#
+# 💬 /chat — Zentrale Schnittstelle für User-Eingaben aus der IDE
+# -----------------------------------------------------------------------------#
 class ChatRequest(BaseModel):
     prompt: str
 
+
 @app.post("/chat")
-async def chat_endpoint(req: ChatRequest):
-    runtime = app.state.runtime
-    zep = runtime.zep_client
+async def chat(req: ChatRequest):
+    rt = app.state.runtime
+    zep = rt.zep_client
+    t1_mem = rt.t1_memory
+    ctxprov = rt.ctx_provider
+    hma = rt.hma["hma"]  # HauptMetaAgent-Instanz
 
-    lobby = runtime.hub["lobby"]
-    manager = lobby["manager"]
-    root_memory = runtime.lobby["root_memory"]
-
-    # 1) Persist user prompt into the root thread (the shared user/groupchat thread)
-    from autogen_core.memory import MemoryContent, MemoryMimeType
-
-    await root_memory.add(
+    # 1) User-Prompt in T1 schreiben
+    await t1_mem.add(
         MemoryContent(
             content=req.prompt,
             mime_type=MemoryMimeType.TEXT,
-            metadata={"type": "message", "role": "user", "name": "User"},
+            metadata={"type": "message", "role": "user", "name": "User", "thread": "T1"},
         )
     )
 
-    # 2) Refresh high-level context (summary) into the ContextProvider
-    ctx = await zep.thread.get_user_context(thread_id=runtime.thread_id, mode="summary")
-    runtime.hub["context_provider"].update((ctx.context or "").strip())
-
-    # 3) Kick off the conversation via manager (auto pattern: THINK/PLAN/EXECUTE/RETURN decided by manager)
-    #    UserProxyAgent is just the starter; no human input loop here.
-    user = UserProxyAgent(name="User", human_input_mode="NEVER", code_execution_config=False)
-    user.initiate_chat(manager, message=req.prompt)
-
-    # 4) Collect latest assistant messages from all lobby agents (conservative)
-    out: list[dict[str, str]] = []
-    for agent in lobby["groupchat"].agents:
-        try:
-            key = next(iter(agent.chat_messages.keys()))
-            msgs = agent.chat_messages[key]
-            # pick last assistant message authored by the agent
-            for m in reversed(msgs):
-                if m.get("role") == "assistant" and m.get("name") == agent.name:
-                    out.append({"agent": agent.name, "content": m.get("content", "")})
-                    break
-        except Exception:
-            # best-effort: skip agents without messages
-            pass
-
-    # 5) Optionally persist RETURN into the root thread (so the shared chat has the final answer)
+    # 2) Context aktualisieren (Summary aus T1)
     try:
-        ret_msg = next((r["content"] for r in out if r["agent"] == "RETURN"), None)
-        if ret_msg:
-            await root_memory.add(
-                MemoryContent(
-                    content=ret_msg,
-                    mime_type=MemoryMimeType.TEXT,
-                    metadata={"type": "message", "role": "assistant", "name": "RETURN"},
-                )
-            )
+        ctx = await zep.thread.get_user_context(thread_id=cast(str, rt.t1_thread_id), mode="summary")
+        if hasattr(ctxprov, "update"):
+            ctxprov.update((ctx.context or "").strip())
     except Exception:
         pass
 
-    return {"responses": out}
+    # 3) HMA-Schritt (DEMO parallel → Ich → deliver_to → Speaker/Messaging)
+    result = hma.step(req.prompt)
+    # result enthält: final, deliver_to, speaker, content, envelope, snapshot
+    # Kompat mit IDE: responses für die Chatliste füllen
+    resp_items = []
+    to = result.get("deliver_to")
+    content = result.get("content", "")
+    if to == "user" and content:
+        resp_items.append({"agent": "SOM", "content": content})
 
-# -----------------------------------------------------------------------------
-# Local run (production runs through uvicorn CLI in Docker)
-# -----------------------------------------------------------------------------
-if __name__ == "__main__":
-    import uvicorn
+    return {
+        "ok": True,
+        "final": result.get("final", True),
+        "deliver_to": to,
+        "speaker": result.get("speaker"),
+        "corr_id": (result.get("envelope") or {}).get("corr_id"),
+        "packet_id": (result.get("envelope") or {}).get("id"),
+        "p_snapshot": result.get("snapshot"),
+        "responses": resp_items,   # 👈 wichtig für dein ViewModel
+    }
 
-    logger.info("serve: http://0.0.0.0:8080")
-    uvicorn.run(app, host="0.0.0.0", port=8080, reload=False)
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Gateway Backend mit HMA läuft."}

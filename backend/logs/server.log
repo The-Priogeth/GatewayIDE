@@ -157,3 +157,172 @@
 2025-10-06 19:58:52.263 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
 2025-10-06 19:58:53.299 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
 2025-10-06 20:02:44.138 | INFO     | main:lifespan:87 - shutdown: ok
+2025-10-12 19:49:52.760 | INFO     | main:lifespan:61 - ready: user=groupchat_ec07cb8d thread=thread_groupchat_3cb71f83
+2025-10-12 19:49:52.762 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-12 19:49:52.762 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-12 19:52:18.992 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/konstruktor.py')}
+2025-10-12 20:04:58.125 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/bootstrap.py')}
+2025-10-12 20:05:04.135 | INFO     | main:lifespan:77 - shutdown: ok
+2025-10-12 20:06:02.787 | INFO     | main:lifespan:61 - ready: user=groupchat_58f7e865 thread=thread_groupchat_5f32b8f0
+2025-10-12 20:06:02.788 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-12 20:06:02.789 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 00:38:52.640 | INFO     | main:lifespan:61 - ready: user=groupchat_f410d9a8 thread=thread_groupchat_770855bd
+2025-10-13 00:38:52.641 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 00:38:52.641 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 01:29:42.211 | INFO     | main:lifespan:61 - ready: user=groupchat_845b4c79 thread=thread_groupchat_9262cf90
+2025-10-13 01:29:42.213 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 01:29:42.213 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 01:39:46.862 | INFO     | main:lifespan:61 - ready: user=groupchat_de7dbd06 thread=thread_groupchat_20ec91dc
+2025-10-13 01:39:46.863 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 01:39:46.863 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 02:12:24.688 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/bootstrap.py')}
+2025-10-13 02:13:55.435 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 02:18:54.885 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/bootstrap.py')}
+2025-10-13 02:19:46.294 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/konstruktor.py')}
+2025-10-13 02:21:28.107 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_849c1c90 thread=thread_groupchat_ed82c052
+2025-10-13 02:21:28.109 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 02:21:28.109 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 02:25:11.595 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 02:26:42.411 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_30106468 thread=thread_groupchat_d3669c04
+2025-10-13 02:26:42.413 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 02:26:42.413 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 02:31:22.135 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.deleted: 3>, '/app/backend/agent_core/managers/nested_adapters.py'), (<Change.modified: 2>, '/app/backend/agent_core/managers')}
+2025-10-13 02:34:48.379 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 02:35:01.311 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/librarian.py')}
+2025-10-13 02:35:09.418 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/trainer.py')}
+2025-10-13 02:42:59.638 | INFO     | main:lifespan:80 - 🧹 Shutdown complete.
+2025-10-13 02:43:54.627 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_9931e48e thread=thread_groupchat_6991e884
+2025-10-13 02:43:54.629 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 02:43:54.629 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 02:50:44.374 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 02:50:47.126 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/librarian.py')}
+2025-10-13 02:50:58.664 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/trainer.py')}
+2025-10-13 02:52:31.477 | INFO     | main:lifespan:80 - 🧹 Shutdown complete.
+2025-10-13 02:53:23.659 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_78799e92 thread=thread_groupchat_8e67f6eb
+2025-10-13 02:53:23.661 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 02:53:23.661 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 03:00:34.425 | INFO     | main:lifespan:80 - 🧹 Shutdown complete.
+2025-10-13 09:51:41.195 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_068a1a78 thread=thread_groupchat_e08dd480
+2025-10-13 09:51:41.197 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 09:51:41.197 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 09:58:45.822 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers'), (<Change.modified: 2>, '/app/backend/routes'), (<Change.modified: 2>, '/app/backend/agent_core/agents/adapters'), (<Change.modified: 2>, '/app/backend/memory'), (<Change.modified: 2>, '/app/backend/zep_autogen'), (<Change.modified: 2>, '/app/backend/agent_core/agents'), (<Change.modified: 2>, '/app/backend/agent_core')}
+2025-10-13 09:58:46.325 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/ag2/autogen/oai'), (<Change.modified: 2>, '/app/backend/ag2/autogen/fast_depends/core'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat/contrib'), (<Change.modified: 2>, '/app/backend/ag2/autogen/events'), (<Change.modified: 2>, '/app/backend/ag2/autogen/llm_config'), (<Change.modified: 2>, '/app/backend/ag2/autogen/fast_depends/dependencies'), (<Change.modified: 2>, '/app/backend'), (<Change.modified: 2>, '/app/backend/ag2/autogen/io'), (<Change.modified: 2>, '/app/backend/ag2/autogen/io/processors'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat/contrib/captainagent'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat'), (<Change.modified: 2>, '/app/backend/ag2/autogen/fast_depends'), (<Change.modified: 2>, '/app/backend/ag2/autogen'), (<Change.modified: 2>, '/app/backend/ag2/autogen/cache'), (<Change.modified: 2>, '/app/backend/ag2/autogen/oai/oai_models'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat/group/targets'), (<Change.modified: 2>, '/app/backend/ag2/autogen/logger'), (<Change.modified: 2>, '/app/backend/ag2/autogen/fast_depends/library'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat/contrib/capabilities'), (<Change.modified: 2>, '/app/backend/ag2/autogen/agentchat/group'), (<Change.modified: 2>, '/app/backend/ag2/autogen/tools'), (<Change.modified: 2>, '/app/backend/ag2/autogen/coding')}
+2025-10-13 10:01:23.475 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 10:03:07.845 | INFO     | main:lifespan:67 - ✅ Runtime ready: user=groupchat_ec467fb4 thread=thread_groupchat_b6c57c6d
+2025-10-13 10:03:07.847 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 10:03:07.847 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 10:19:58.044 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 10:26:55.089 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 10:33:33.662 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=10:33:33
+  taskmanager: mod_id=139749661382336 mod=/app/backend/agent_core/managers/taskmanager.py mtime=02:50:44 sha=6df2b99ac6e3 | code=/app/backend/agent_core/managers/taskmanager.py:44 cmtime=02:50:44 csha=6df2b99ac6e3
+  librarian: mod_id=139749661383456 mod=/app/backend/agent_core/managers/librarian.py mtime=02:50:47 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=02:50:47 csha=4187e1ff6c57
+  trainer: mod_id=139749661384096 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 10:33:33.662 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_0f5684fd thread=thread_groupchat_1da6e46c
+2025-10-13 10:33:33.664 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 10:33:33.664 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 10:34:43.156 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=10:34:43
+  taskmanager: mod_id=139749661382336 mod=/app/backend/agent_core/managers/taskmanager.py mtime=02:50:44 sha=6df2b99ac6e3 | code=/app/backend/agent_core/managers/taskmanager.py:44 cmtime=02:50:44 csha=6df2b99ac6e3
+  librarian: mod_id=139749661383456 mod=/app/backend/agent_core/managers/librarian.py mtime=02:50:47 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=02:50:47 csha=4187e1ff6c57
+  trainer: mod_id=139749661384096 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 10:38:07.529 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/librarian.py')}
+2025-10-13 10:38:40.626 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 10:39:04.903 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=10:39:04
+  taskmanager: mod_id=139749661382336 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:38:40 sha=51bf50daf121 | code=/app/backend/agent_core/managers/taskmanager.py:44 cmtime=10:38:40 csha=51bf50daf121
+  librarian: mod_id=139749661383456 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=139749661384096 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 10:47:53.258 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 10:48:15.288 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=10:48:15
+  taskmanager: mod_id=139749661382336 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:47:53 sha=29bac22d54f8 | code=/app/backend/agent_core/managers/taskmanager.py:44 cmtime=10:47:53 csha=29bac22d54f8
+  librarian: mod_id=139749661383456 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=139749661384096 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 10:56:39.921 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 10:57:02.906 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=10:57:02
+  taskmanager: mod_id=139749661382336 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:56:38 sha=9c3ee88b068c | code=/app/backend/agent_core/managers/taskmanager.py:44 cmtime=10:56:38 csha=9c3ee88b068c
+  librarian: mod_id=139749661383456 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=139749661384096 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 11:02:23.455 | INFO     | main:lifespan:81 - 🧹 Shutdown complete.
+2025-10-13 11:02:56.604 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=11:02:56
+  taskmanager: mod_id=140362381839872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:56:38 sha=9c3ee88b068c | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=10:56:38 csha=9c3ee88b068c
+  librarian: mod_id=140362381840512 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=140362381840992 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 11:02:56.605 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_7a57bd9e thread=thread_groupchat_b2598c8c
+2025-10-13 11:02:56.607 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 11:02:56.607 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 11:03:13.954 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=11:03:13
+  taskmanager: mod_id=140362381839872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:56:38 sha=9c3ee88b068c | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=10:56:38 csha=9c3ee88b068c
+  librarian: mod_id=140362381840512 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=140362381840992 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 11:03:15.924 | WARNING  | backend.agent_core.managers.taskmanager:_hr_ping:13 - 🔥 HR PING [TaskManager.generate_reply:enter]
+2025-10-13 11:03:15.924 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:118 - 🔥 TASKMANAGER HOT-RELOAD TEST ACTIVE 🔥
+2025-10-13 11:03:17.419 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:140 - [TaskManager] reply_type=str
+2025-10-13 15:18:13.580 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 15:27:24.465 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 15:35:54.201 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=15:35:54
+  taskmanager: mod_id=139669557355088 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:56:38 sha=9c3ee88b068c | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=10:56:38 csha=9c3ee88b068c
+  librarian: mod_id=139669557356768 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=139669557357568 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 15:35:54.201 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_c5d5ff96 thread=thread_groupchat_effeae1c
+2025-10-13 15:35:54.203 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 15:35:54.203 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 15:44:40.898 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=15:44:40
+  taskmanager: mod_id=140003890717424 mod=/app/backend/agent_core/managers/taskmanager.py mtime=10:56:38 sha=9c3ee88b068c | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=10:56:38 csha=9c3ee88b068c
+  librarian: mod_id=140003890719104 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=140003890719904 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 15:44:40.898 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_69a6036a thread=thread_groupchat_9c9f61f5
+2025-10-13 15:44:40.900 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 15:44:40.900 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 15:52:56.433 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 15:53:04.395 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=15:53:04
+  taskmanager: mod_id=140003890717424 mod=/app/backend/agent_core/managers/taskmanager.py mtime=15:52:55 sha=91e25fbc943e | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=15:52:55 csha=91e25fbc943e
+  librarian: mod_id=140003890719104 mod=/app/backend/agent_core/managers/librarian.py mtime=10:38:06 sha=4187e1ff6c57 | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=10:38:06 csha=4187e1ff6c57
+  trainer: mod_id=140003890719904 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 15:57:43.049 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/librarian.py')}
+2025-10-13 15:57:48.917 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=15:57:48
+  taskmanager: mod_id=140003890717424 mod=/app/backend/agent_core/managers/taskmanager.py mtime=15:52:55 sha=91e25fbc943e | code=/app/backend/agent_core/managers/taskmanager.py:115 cmtime=15:52:55 csha=91e25fbc943e
+  librarian: mod_id=140003890719104 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:43 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=140003890719904 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 15:57:52.931 | WARNING  | backend.agent_core.managers.taskmanager:_hr_ping:13 - 🔥 HR PING [TaskManager.generate_reply:enter]
+2025-10-13 15:57:52.931 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:118 - 🔥 TASKMANAGER HOT-RELOAD TEST ACTIVE 🔥
+2025-10-13 15:57:54.205 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:140 - [TaskManager] reply_type=str
+2025-10-13 16:16:49.499 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/main.py')}
+2025-10-13 16:21:27.902 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=16:21:27
+  taskmanager: mod_id=139847533667136 mod=/app/backend/agent_core/managers/taskmanager.py mtime=15:52:55 sha=91e25fbc943e | code=/app/backend/agent_core/managers/taskmanager.py:103 cmtime=15:52:55 csha=91e25fbc943e
+  librarian: mod_id=139847533667776 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139847533669376 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:21:27.903 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_43ec122e thread=thread_groupchat_462dfff9
+2025-10-13 16:21:27.904 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 16:21:27.904 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 16:21:41.081 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=16:21:41
+  taskmanager: mod_id=139847533667136 mod=/app/backend/agent_core/managers/taskmanager.py mtime=15:52:55 sha=91e25fbc943e | code=/app/backend/agent_core/managers/taskmanager.py:103 cmtime=15:52:55 csha=91e25fbc943e
+  librarian: mod_id=139847533667776 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139847533669376 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:25:26.593 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 16:25:51.045 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=16:25:51
+  taskmanager: mod_id=139847533667136 mod=/app/backend/agent_core/managers/taskmanager.py mtime=16:25:24 sha=936318fb5eea | code=/app/backend/agent_core/managers/taskmanager.py:103 cmtime=16:25:24 csha=936318fb5eea
+  librarian: mod_id=139847533667776 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139847533669376 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:28:45.552 | INFO     | main:_hotreload_probe:148 - 🔍 HR[startup] t=16:28:45
+  taskmanager: mod_id=139698415575872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=16:25:24 sha=936318fb5eea | code=/app/backend/agent_core/managers/taskmanager.py:108 cmtime=16:25:24 csha=936318fb5eea
+  librarian: mod_id=139698415576112 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139698415576912 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:28:45.553 | INFO     | main:lifespan:68 - ✅ Runtime ready: user=groupchat_d7015224 thread=thread_groupchat_b20b3f5a
+2025-10-13 16:28:45.554 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-13 16:28:45.554 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-13 16:28:51.360 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=16:28:51
+  taskmanager: mod_id=139698415575872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=16:25:24 sha=936318fb5eea | code=/app/backend/agent_core/managers/taskmanager.py:108 cmtime=16:25:24 csha=936318fb5eea
+  librarian: mod_id=139698415576112 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139698415576912 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:28:53.784 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:110 - [TaskManager][TM-LOG-2025-10-13-16:05] generate_reply HIT
+2025-10-13 16:32:38.596 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 16:33:03.450 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=16:33:03
+  taskmanager: mod_id=139698415575872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=16:32:38 sha=eb968d341927 | code=/app/backend/agent_core/managers/taskmanager.py:108 cmtime=16:32:38 csha=eb968d341927
+  librarian: mod_id=139698415576112 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139698415576912 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:33:05.430 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:110 - [TaskManager][TM-LOG-2025-10-13-16:05] generate_reply HIT
+2025-10-13 16:36:43.667 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
+2025-10-13 16:36:47.853 | INFO     | main:_hotreload_probe:148 - 🔍 HR[request] t=16:36:47
+  taskmanager: mod_id=139698415575872 mod=/app/backend/agent_core/managers/taskmanager.py mtime=16:36:42 sha=fbaac596a496 | code=/app/backend/agent_core/managers/taskmanager.py:108 cmtime=16:36:42 csha=fbaac596a496
+  librarian: mod_id=139698415576112 mod=/app/backend/agent_core/managers/librarian.py mtime=15:57:42 sha=51dbe78d5fbe | code=/app/backend/agent_core/managers/librarian.py:61 cmtime=15:57:42 csha=51dbe78d5fbe
+  trainer: mod_id=139698415576912 mod=/app/backend/agent_core/managers/trainer.py mtime=02:50:55 sha=281c77ae1949 | code=/app/backend/agent_core/managers/trainer.py:42 cmtime=02:50:55 csha=281c77ae1949
+2025-10-13 16:36:50.146 | WARNING  | backend.agent_core.managers.taskmanager:generate_reply:110 - [TaskManager][TM-LOG-2025-10-13-16:05] generate_reply HIT
+2025-10-13 21:06:56.639 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/managers/taskmanager.py')}
