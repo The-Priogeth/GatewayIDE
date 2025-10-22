@@ -235,9 +235,17 @@ class HauptMetaAgent:
             som_final_template=self.cfg.som_final_template
         )
         self._log("assistant", "SOM:ich", f"{ich_text[:200]}{'...' if len(ich_text)>200 else ''} | deliver_to={deliver_to}")
-        # 🔎 NEU: HMA intern nach T2 schreiben (Aggregate + Ich-Referenz)
+        inner_combined: str = ""
         try:
-            self.messaging.log_som_internal_t2(aggregate=inner_material, ich_text=ich_text)
+            # Persistieren & zugleich den kombinierten Text als Echo behalten
+            _snap = self.messaging.log_som_internal_t2(aggregate=inner_material, ich_text=ich_text)
+            # Rekonstruiere denselben zusammengesetzten Text lokal:
+            inner_combined = (
+                "# Interner Zwischenstand\n"
+                f"{(inner_material or '').strip() or '(keine internen Beiträge)'}\n\n"
+                "# Ich\n"
+                f"{(ich_text or '').strip()}"
+            )
         except Exception as e:
             logger.warning(f"[SOM:T2] Persist-Problem: {e}")
         result = self.speaker.speak(from_name="HMA", to=deliver_to, ich_text=ich_text)
@@ -249,6 +257,7 @@ class HauptMetaAgent:
             "content": ich_text,
             "envelope": result.get("envelope"),
             "snapshot": result.get("snapshot"),
+            "inner_combined": inner_combined,
         }
 
 

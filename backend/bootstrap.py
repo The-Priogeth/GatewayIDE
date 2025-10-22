@@ -141,11 +141,13 @@ async def ensure_runtime() -> SimpleNamespace:
     PBUFFER_DIR = os.getenv("PBUFFER_DIR", "/app/pbuffer")
     pbuffer = PBuffer(dirpath=PBUFFER_DIR)
 
+    sink_t1 = MemorySink(thread_id=t1_thread_id, memory=t1_memory)
     sink_t2 = MemorySink(thread_id=t2_thread_id, memory=t2_memory)
     sink_t3 = MemorySink(thread_id=t3_thread_id, memory=t3_memory)
 
     messaging = MessagingRouter(
         pbuffer=pbuffer,
+        sink_t1=sink_t1,
         sink_t2=sink_t2,
         sink_t3=sink_t3,
         transport=transport,
@@ -154,11 +156,14 @@ async def ensure_runtime() -> SimpleNamespace:
     def memory_logger(role: str, name: str, content: str) -> None:
         async def _w():
             try:
-                await t1_memory.add(MemoryContent(
-                    content=str(content),
-                    mime_type=MemoryMimeType.TEXT,
-                    metadata={"type": "message", "role": role, "name": name, "thread": "T1"},
-                ))
+                # Nur USER-Eingaben oder explizite T1-Dialogeinträge verbleiben in T1.
+                # Interne Assistant-/SOM-Logs bitte nicht nach T1 kippen.
+                if str(role).lower() == "user":
+                    await t1_memory.add(MemoryContent(
+                        content=str(content),
+                        mime_type=MemoryMimeType.TEXT,
+                        metadata={"type": "message", "role": role, "name": name, "thread": "T1"},
+                    ))
                 await ctx_provider.refresh()
             except Exception:
                 pass

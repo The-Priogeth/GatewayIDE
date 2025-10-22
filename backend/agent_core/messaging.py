@@ -75,10 +75,12 @@ class Transport:
 class MessagingRouter:
     def __init__(self, *,
                  pbuffer: PBuffer,
+                 sink_t1: MemorySink,
                  sink_t2: MemorySink,        # user-visible Text
                  sink_t3: MemorySink,        # meta-protocol ENVELOPE only
                  transport: Transport):
         self.pbuffer = pbuffer
+        self.sink_t1 = sink_t1
         self.sink_t2 = sink_t2
         self.sink_t3 = sink_t3
         self.transport = transport
@@ -143,13 +145,13 @@ class MessagingRouter:
         }, ensure_ascii=False)
 
     def send_addressed_message(self, *, frm: str, to: DeliverTo, text: str,
-                               intent: Literal["ask","inform","order","notify"]="inform",
-                               corr_id: Optional[str]=None, parent_id: Optional[str]=None,
-                               meta: Optional[Dict[str, Any]]=None) -> Dict[str, Any]:
+                               intent: Literal["ask","inform","order","notify"] = "inform",
+                               corr_id: Optional[str] = None, parent_id: Optional[str] = None,
+                               meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         1) Snapshot in P (Paketinhalt als Datei)
         2) Persistenz:
-           - deliver_to == user  → T2: TEXT
+           - deliver_to == user           → T1: TEXT (Final-Dialog)
            - deliver_to in {task,lib,trn} → T3: ENVELOPE (ohne Payload)
         3) Transport (tatsächliches Senden)
         Rückgabe enthält Envelope-JSON und Snapshot-Pfad.
@@ -159,17 +161,22 @@ class MessagingRouter:
         snapshot_path = self.pbuffer.snapshot(corr_id=env.corr_id, to=to, text=text)
 
         # 2) Persistenz (asynchron via Zep)
-        #    - user → T2 schreibt den TEXT (user-visible)
-        #    - meta → T3 schreibt NUR die ENVELOPE
         if to == "user":
-            # keine Persistenz in T2 – Chat-Antwort geht direkt an T1 (Transport)
-            pass
+            # T1: Final-Dialog persistieren (Assistant → User)
+            try:
+                import asyncio
+                asyncio.create_task(self.sink_t1.write_text(
+                    role="assistant", name=str(frm or "HMA"), text=text,
+                    meta={"thread": "T1", "kind": "final", "corr_id": env.corr_id}
+                ))
+            except Exception:
+                pass
         else:
             # T3: ENVELOPE ONLY
             try:
                 import asyncio
                 asyncio.create_task(self.sink_t3.write_text(role="system", name="PROTO", text=self._envelope_json(env),
-                                                            meta={"channel": "meta", "corr_id": env.corr_id}))
+                                                             meta={"channel": "meta", "corr_id": env.corr_id}))
             except Exception:
                 pass
 

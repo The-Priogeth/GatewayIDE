@@ -238,3 +238,24 @@
 2025-10-21 10:20:51.546 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
 2025-10-21 10:21:16.530 | INFO     | backend.agent_core.konstruktor:_log:221 - [INPUT] → user: hi
 2025-10-21 10:21:19.509 | INFO     | backend.agent_core.konstruktor:_log:221 - [SOM:ich] → assistant: Hallo! Wie kann ich Ihnen heute helfen? Gibt es ein bestimmtes Thema oder Anliegen, bei dem ich unterstützen kann? | deliver_to=user
+2025-10-22 03:34:12.017 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/bootstrap.py')}
+2025-10-22 03:34:12.218 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-22 03:34:20.207 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_da1787 T2=thread_t2_user_visible_781645 T3=thread_t3_meta_proto_dfc8b8 T4=thread_t4_lib_internal_2ac995 T5=thread_t5_task_internal_c0dd7b T6=thread_t6_trn_internal_ccf17a
+2025-10-22 03:34:20.209 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-22 03:34:20.209 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-22 03:34:27.291 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_ec8a79 T2=thread_t2_user_visible_8b0fed T3=thread_t3_meta_proto_f1b868 T4=thread_t4_lib_internal_a03aa6 T5=thread_t5_task_internal_40716e T6=thread_t6_trn_internal_2430df
+2025-10-22 03:34:27.293 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-22 03:34:27.293 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-22 03:34:34.553 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_eef354 T2=thread_t2_user_visible_594322 T3=thread_t3_meta_proto_0efdd7 T4=thread_t4_lib_internal_7666ea T5=thread_t5_task_internal_7359d4 T6=thread_t6_trn_internal_f86f8e
+2025-10-22 03:34:34.555 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-22 03:34:34.555 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-22 03:43:23.961 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core'), (<Change.deleted: 3>, '/app/backend/agent_core/router.py'), (<Change.deleted: 3>, '/app/backend/agent_core/messaging_protocol.py'), (<Change.deleted: 3>, '/app/backend/agent_core/speaker.py'), (<Change.deleted: 3>, '/app/backend/agent_core/pbuffer.py')}
+2025-10-22 03:43:24.211 | INFO     | backend.main:lifespan:92 - 🧹 Shutdown complete.
+2025-10-22 03:43:30.863 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_4b4e63 T2=thread_t2_user_visible_606966 T3=thread_t3_meta_proto_0e6509 T4=thread_t4_lib_internal_0b1d65 T5=thread_t5_task_internal_3f8d60 T6=thread_t6_trn_internal_6a1aae
+2025-10-22 03:43:30.865 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-22 03:43:31.924 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.
+2025-10-22 03:43:33.075 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core'), (<Change.deleted: 3>, '/app/backend/agent_core/core_agents.json')}
+2025-10-22 03:47:32.314 | INFO     | backend.routes.websocket:watcher:46 - 📦 Änderung erkannt: {(<Change.modified: 2>, '/app/backend/agent_core/messaging.py')}
+2025-10-22 03:47:39.364 | INFO     | backend.main:lifespan:75 - ✅ Runtime ready | T1=thread_t1_root_705bc5 T2=thread_t2_user_visible_92df3c T3=thread_t3_meta_proto_7a29e1 T4=thread_t4_lib_internal_5b4ea0 T5=thread_t5_task_internal_bc6494 T6=thread_t6_trn_internal_3b8a46
+2025-10-22 03:47:39.365 | INFO     | backend.routes.websocket:watcher:40 - 👀 Watcher gestartet für: /app/backend
+2025-10-22 03:47:39.365 | INFO     | backend.routes.websocket:start_watcher:50 - 🧵 Watcher-Thread gestartet.

@@ -142,6 +142,11 @@ async def chat(req: ChatRequest):
     resp_items = []
     to = result.get("deliver_to")
     content = result.get("content", "")
+    # 3a) Innerer Prozess (immer mitsenden, wenn vorhanden)
+    inner = (result.get("inner_combined") or "").strip()
+    if inner:
+        resp_items.append({"agent": "SOM:inner", "content": inner})
+    # 3b) Finale Ich-Antwort an den User
     if to == "user" and content:
         resp_items.append({"agent": "SOM", "content": content})
 

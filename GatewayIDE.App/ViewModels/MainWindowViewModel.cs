@@ -291,8 +291,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             case "SOM":
                 // Sichtbar im Chat-Thread (T1)
                 AppendThreadMessage(ThreadId.T1, $"[SOM]\n{content}");
-                // Optional: parallel auch im T2-Panel zeigen
-                AppendThreadMessage(ThreadId.T2, $"[SOM]\n{content}");
+                break;
+
+            case "SOM:INNER":
+                AppendThreadMessage(ThreadId.T2, content!);
                 break;
 
             case "TASKMANAGER":

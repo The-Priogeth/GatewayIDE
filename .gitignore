@@ -70,6 +70,7 @@ GatewayIDE-crash.log
 
 # Projekt
 /backend/ag2/
+/backend/logs/
 /docs/legacy/
 **/deploy/**/logs/
 *.axaml.cs.*.cache
