@@ -40,10 +40,14 @@ DEFAULT_HMA_CONFIG = HMAConfig(
         "{user_text}\n\n"
         "# Interner Zwischenstand\n{aggregate}\n\n"
         "# Aufgabe\n"
-        "1) Formuliere meine finale Antwort in der Ich-Form. "
-        "   Halte dich kurz; nenne ggf. 1–3 konkrete nächste Schritte.\n"
-        "2) Hänge NACH der Antwort in einer neuen Zeile NUR folgendes JSON an (ohne weitere Worte):\n"
-        '{{"deliver_to":"user|task|lib|trn"}}'
+        "1) Formuliere meine finale Antwort in der Ich-Form (knapp, konkret).\n"
+        "2) Wähle GENAU EINE Route aus: user | task | lib | trn.\n"
+        "   Schreibe sie als letzte Zeile im folgenden Format.\n"
+        "   Beispiel:\n"
+        "   ROUTE_JSON: {{\"deliver_to\":\"user\"}}\n"
+        "JETZT NUR DEINE AUSGABE:\n"
+        # ← Deine eigentliche Antwort kommt hierhin (vom Modell generiert)
+        "ROUTE_JSON: {{\"deliver_to\":\"user|task|lib|trn\"}}"
     ),
     capabilities={
         "task": "Aufgaben strukturieren, Pläne/Implementierungsschritte vorschlagen.",

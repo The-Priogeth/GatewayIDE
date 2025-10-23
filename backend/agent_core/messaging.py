@@ -7,6 +7,11 @@ import os, uuid, time, json
 # --------- Typen ---------
 DeliverTo = Literal["user", "task", "lib", "trn"]
 
+def compose_inner_combined(aggregate: str, ich_text: str) -> str:
+    agg = (aggregate or "").strip() or "(keine internen Beiträge)"
+    ich = (ich_text or "").strip()
+    return f"# Interner Zwischenstand\n{agg}\n\n# Ich\n{ich}"
+
 @dataclass
 class Envelope:
     id: str
@@ -103,12 +108,7 @@ class MessagingRouter:
         - # Interner Zwischenstand (Demo-Beiträge)
         - # Ich (Finale Ich-Referenz)
         """
-        combined = (
-            "# Interner Zwischenstand\n"
-            f"{(aggregate or '').strip() or '(keine internen Beiträge)'}\n\n"
-            "# Ich\n"
-            f"{(ich_text or '').strip()}"
-        )
+        combined = compose_inner_combined(aggregate, ich_text)
         snap = self._persist_sink(
             sink=self.sink_t2,
             role="assistant",
