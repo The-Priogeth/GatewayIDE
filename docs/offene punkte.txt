@@ -1,0 +1,17 @@
+Offene Punkte (nur für root.md-Pflege)
+
+ARCHITECTURE.md an aktuellen Stand anpassen (SoM/HMA, Tabs, WS, Zep-Limit).
+
+README.md als Einstieg (Quickstart, Build, Run, Tabs).
+
+backend/agent_core/konstruktor.py → constructor.py umbenennen + Referenzen prüfen.
+
+backend/zep_autogen/memory.py vs. backend/memory/memory.py kollision auflösen (Namens-/Verantwortungstrennung).
+
+services/GatewayAI/ai_service/ Verschachtelung reduzieren (ein Ebenenlevel).
+
+GatewayIDE.App/ViewModels/MainWindowViewModel.cs modularisieren (z. B. Tabs/ mit separaten VMs).
+
+/routes Einzeldateien ergänzen, sobald gelistet.
+
+docs/ mit neuer FileStrukture.md verlinken (nach Upload).

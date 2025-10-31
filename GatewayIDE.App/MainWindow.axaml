@@ -53,25 +53,31 @@
       <Border Background="#3b3f46" Width="{Binding LeftPaneWidth}" MinWidth="0">
         <Grid RowDefinitions="*,Auto" Margin="8">
 
-          <!-- Chat Panel (links) -->
-          <ListBox Grid.Row="0"
-                  ItemsSource="{Binding ChatLines}"
-                  SelectedIndex="{Binding ChatSelectedIndex}">
-            <ListBox.Styles>
-              <Style Selector="ListBoxItem">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-              </Style>
-            </ListBox.Styles>
+        <!-- Chat Panel (links) -->
+        <ListBox Grid.Row="0"
+                ItemsSource="{Binding ChatLines}"
+                SelectedIndex="{Binding ChatSelectedIndex}">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            </Style>
+          </ListBox.Styles>
 
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Text}"
-                          Foreground="{Binding Brush}"
-                          FontFamily="Consolas, Menlo, monospace"
-                          TextWrapping="Wrap"/>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <!-- ReadOnly TextBox = selektier- & kopierbar -->
+              <TextBox Text="{Binding Text}"
+                      IsReadOnly="True"
+                      AcceptsReturn="True"
+                      TextWrapping="Wrap"
+                      BorderThickness="0"
+                      Background="Transparent"
+                      Foreground="{Binding Brush}"
+                      FontFamily="Consolas, Menlo, monospace"/>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
 
           <!-- Chat-Eingabe -->
           <TextBox x:Name="ChatInputBox"

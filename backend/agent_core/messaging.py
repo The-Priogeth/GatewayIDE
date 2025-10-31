@@ -1,193 +1,93 @@
 # backend/agent_core/messaging.py
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, Dict, Any, Literal, Callable
-import os, uuid, time, json
+from dataclasses import dataclass, asdict
+from typing import Any, Literal
+import os, time, uuid
+Role = Literal["user", "assistant", "system"]
 
-# --------- Typen ---------
-DeliverTo = Literal["user", "task", "lib", "trn"]
-
-def compose_inner_combined(aggregate: str, ich_text: str) -> str:
-    agg = (aggregate or "").strip() or "(keine internen Beiträge)"
-    ich = (ich_text or "").strip()
-    return f"# Interner Zwischenstand\n{agg}\n\n# Ich\n{ich}"
+@dataclass
+class Message:
+    role: Role
+    text: str
+    meta: dict[str, Any] | None = None
+    deliver_to: str | None = None  # optional, Rohwert falls SOM-Text enthalten ist
 
 @dataclass
 class Envelope:
-    id: str
-    ts: float
-    frm: str
-    to: DeliverTo | str
-    intent: Literal["ask","inform","order","notify"]
-    corr_id: str
-    parent_id: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    thread: str   # "T1"..."T6"
+    message: Message
 
-# --------- P-Buffer (Snapshot vor Versand) ---------
-class PBuffer:
-    def __init__(self, dirpath: str):
-        self.dir = dirpath
-        os.makedirs(self.dir, exist_ok=True)
+def log(msg: str, scope: str = "sys") -> None:
+    # Zentraler Logger (kann an loguru/structlog gebunden werden)
+    print(f"{scope} | {msg}")
 
-    def snapshot(self, *, corr_id: str, to: str, text: str) -> str:
-        path = os.path.join(self.dir, f"{corr_id}_{int(time.time())}_{to}.txt")
+def store(envelope: Envelope) -> None:
+    # Persistiere envelope (hier nur Platzhalter – bei dir an Zep/DB binden)
+    log(f"STORE {envelope.thread}: {asdict(envelope)}", scope="store")
+
+def forward(envelope: Envelope) -> None:
+    # Transport/Signal – bewusst ohne Geschäftslogik
+    log(f"FORWARD {envelope.thread}: {asdict(envelope)}", scope="forward")
+
+def snapshot(text: str, *, to: str = "user", corr_id: str | None = None, dirpath: str | None = None) -> str:
+    """
+    Legt einen minimalen Text-Snapshot auf der Platte ab.
+    Gibt den Pfad zurück (für Debug/Telemetry).
+    """
+    dirpath = dirpath or os.getenv("PBUFFER_DIR", "/app/pbuffer")
+    try:
+        os.makedirs(dirpath, exist_ok=True)
+    except Exception:
+        pass
+    corr = corr_id or str(uuid.uuid4())
+    fname = f"{int(time.time())}_{to}_{corr}.txt"
+    path = os.path.join(dirpath, fname)
+    try:
         with open(path, "w", encoding="utf-8") as f:
-            f.write(text)
-        return path
+            f.write(text or "")
+    except Exception:
+        pass
+    return path
 
-# --------- Zep-Senke (ein Thread, ein Memory) ---------
-class MemorySink:
-    def __init__(self, *, thread_id: str, memory: Any):
-        self.thread_id = thread_id
-        self.memory = memory  # erwartet add(MemoryContent(...))
+# ---------------------------------------------------------------------
+# T2 Persistenz (Slim, async)
+# ---------------------------------------------------------------------
+import asyncio
 
-    async def write_text(self, *, role: str, name: str, text: str, meta: Dict[str, Any]) -> None:
-        from autogen_core.memory import MemoryContent, MemoryMimeType
-        await self.memory.add(
+async def log_som_internal_t2(
+    *, t2_memory, aggregate: str, ich_text: str, corr_id: str | None = None
+) -> bool:
+    """
+    Speichert den internen SOM-Zwischenstand (aggregate + ich_text) in Thread T2.
+    Erwartet ein ZepUserMemory-Objekt als t2_memory.
+    """
+    if not t2_memory:
+        print("[Messaging:T2] Kein t2_memory übergeben – übersprungen.")
+        return False
+
+    from autogen_core.memory import MemoryContent, MemoryMimeType
+
+    content = (
+        f"# Interner Zwischenstand\n{aggregate}\n\n"
+        f"# Ich-Antwort (Roh)\n{ich_text.strip()}"
+    )
+
+    try:
+        await t2_memory.add(
             MemoryContent(
-                content=str(text),
+                content=content,
                 mime_type=MemoryMimeType.TEXT,
-                metadata={**meta, "role": role, "name": name},
+                metadata={
+                    "type": "message",
+                    "role": "system",
+                    "name": "SOM:inner",
+                    "thread": "T2",
+                    "corr_id": corr_id or "no-id",
+                },
             )
         )
-
-# --------- Transport (tatsächliches Senden) ---------
-class Transport:
-    """
-    Kapselt die konkreten Sendekanäle. Jede Methode ist ein Call, der die jeweilige
-    Gegenstelle „erreicht“ (UI/Meta-Agent). Persistenz macht MessagingRouter.
-    """
-    def __init__(self, *, to_user: Callable[[str], None], to_task: Callable[[str], None],
-                 to_lib: Callable[[str], None], to_trn: Callable[[str], None]):
-        self._to_user = to_user
-        self._to_task = to_task
-        self._to_lib  = to_lib
-        self._to_trn  = to_trn
-
-    def send(self, *, to: DeliverTo, text: str) -> None:
-        if to == "user":
-            self._to_user(text)
-        elif to == "task":
-            self._to_task(text)
-        elif to == "lib":
-            self._to_lib(text)
-        elif to == "trn":
-            self._to_trn(text)
-        else:
-            raise RuntimeError(f"Unknown deliver_to: {to}")
-
-# --------- MessagingRouter (Orchestriert P -> Persistenz -> Transport) ---------
-class MessagingRouter:
-    def __init__(self, *,
-                 pbuffer: PBuffer,
-                 sink_t1: MemorySink,
-                 sink_t2: MemorySink,        # user-visible Text
-                 sink_t3: MemorySink,        # meta-protocol ENVELOPE only
-                 transport: Transport):
-        self.pbuffer = pbuffer
-        self.sink_t1 = sink_t1
-        self.sink_t2 = sink_t2
-        self.sink_t3 = sink_t3
-        self.transport = transport
-
-    def _persist_sink(self, *, sink: Any, role: str, name: str, text: str, meta: Dict[str, Any]) -> dict[str, Any]:
-        """
-        Kleiner Helper für synchrone Persistenz in einen MemorySink.
-        Wird in log_som_internal_t2() verwendet.
-        """
-        try:
-            import asyncio
-            asyncio.create_task(sink.write_text(role=role, name=name, text=text, meta=meta))
-            return {"ok": True, "thread": meta.get("thread"), "name": name}
-        except Exception as e:
-            return {"ok": False, "error": str(e), "thread": meta.get("thread"), "name": name}
-
-    def log_som_internal_t2(self, *, aggregate: str, ich_text: str, corr_id: str | None = None) -> dict[str, any]:
-        """
-        Persistiert die interne Denkrunde in T2 als EINEN Eintrag:
-        - # Interner Zwischenstand (Demo-Beiträge)
-        - # Ich (Finale Ich-Referenz)
-        """
-        combined = compose_inner_combined(aggregate, ich_text)
-        snap = self._persist_sink(
-            sink=self.sink_t2,
-            role="assistant",
-            name="SOM:inner",
-            text=combined,
-            meta={"thread": "T2", "kind": "inner_combined", "corr_id": corr_id or ""}
-        )
-        return {"t2_combined": snap}
-
-
-    def _make_envelope(self, *, frm: str, to: DeliverTo, intent: Literal["ask","inform","order","notify"],
-                       corr_id: Optional[str], parent_id: Optional[str], meta: Dict[str, Any]) -> Envelope:
-        return Envelope(
-            id=str(uuid.uuid4()),
-            ts=time.time(),
-            frm=frm,
-            to=to,
-            intent=intent,
-            corr_id=corr_id or str(uuid.uuid4()),
-            parent_id=parent_id,
-            meta=meta or {},
-        )
-
-    def _envelope_json(self, env: Envelope) -> str:
-        return json.dumps({
-            "id": env.id,
-            "ts": env.ts,
-            "from": env.frm,
-            "to": env.to,
-            "intent": env.intent,
-            "corr_id": env.corr_id,
-            "parent_id": env.parent_id,
-            "meta": env.meta or {},
-        }, ensure_ascii=False)
-
-    def send_addressed_message(self, *, frm: str, to: DeliverTo, text: str,
-                               intent: Literal["ask","inform","order","notify"] = "inform",
-                               corr_id: Optional[str] = None, parent_id: Optional[str] = None,
-                               meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        1) Snapshot in P (Paketinhalt als Datei)
-        2) Persistenz:
-           - deliver_to == user           → T1: TEXT (Final-Dialog)
-           - deliver_to in {task,lib,trn} → T3: ENVELOPE (ohne Payload)
-        3) Transport (tatsächliches Senden)
-        Rückgabe enthält Envelope-JSON und Snapshot-Pfad.
-        """
-        env = self._make_envelope(frm=frm, to=to, intent=intent, corr_id=corr_id, parent_id=parent_id, meta=meta or {})
-        # 1) P-Snapshot (immer Text, simple File Copy)
-        snapshot_path = self.pbuffer.snapshot(corr_id=env.corr_id, to=to, text=text)
-
-        # 2) Persistenz (asynchron via Zep)
-        if to == "user":
-            # T1: Final-Dialog persistieren (Assistant → User)
-            try:
-                import asyncio
-                asyncio.create_task(self.sink_t1.write_text(
-                    role="assistant", name=str(frm or "HMA"), text=text,
-                    meta={"thread": "T1", "kind": "final", "corr_id": env.corr_id}
-                ))
-            except Exception:
-                pass
-        else:
-            # T3: ENVELOPE ONLY
-            try:
-                import asyncio
-                asyncio.create_task(self.sink_t3.write_text(role="system", name="PROTO", text=self._envelope_json(env),
-                                                             meta={"channel": "meta", "corr_id": env.corr_id}))
-            except Exception:
-                pass
-
-        # 3) Transport ausführen (one-way, bare-bones)
-        self.transport.send(to=to, text=text)
-
-        return {
-            "envelope": {
-                "json": self._envelope_json(env),
-                "id": env.id,
-                "corr_id": env.corr_id,
-            },
-            "snapshot": snapshot_path,
-        }
+        print("[Messaging:T2] Persist-OK.")
+        return True
+    except Exception as e:
+        print(f"[Messaging:T2] Persist-Fehler: {e}")
+        return False

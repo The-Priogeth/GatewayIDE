@@ -1,0 +1,129 @@
+alles klar, Aaron — hier ist der **ausführliche Status-Snapshot** deines GatewayIDE-Projekts plus **Vision auf einen Blick** (ohne Integrations-Vorschläge, rein Bestandsaufnahme + Zielbild).
+
+# GatewayIDE — aktueller Stand (Detail)
+
+## 1) Zweck & Rolle im Gesamtsystem
+
+* **Mission Control der Innenwelt**: sicht- und steuerbare Orchestrierung deiner SoM-/HMA-Architektur (T1–T6), inkl. Dialog, Planung, Speicher, Tasks.
+* **Entwicklungs-Cockpit**: Logs, Terminals, Docker-Kontrolle, Build/Run-Pfade.
+* **Basis für Erweiterungen**: spätere Module (Education/Exodus, Mini-Games/Tamagotchi, Blockchain-Megaknoten, UE-Anbindungen).
+
+## 2) Architektur (heutiger Stand)
+
+* **Frontend**: Avalonia (.NET 8, Windows Ziel). Mehrere Tabs/Ansichten (Dashboard, KI-System, Docker, Projekt, Blockchain).
+* **Backend**: Python 3.11 + FastAPI + WebSocket-Kanäle (HMA/SOM-Prozess, Router, Speaker, Demo-Agents).
+* **Kommunikation**: HTTP/WS; gRPC war/ist erwogen.
+* **Speicher/Memories**: Zep Graph Memory (bekannte Limitierung: Persist-Fehler bei >2 500 Zeichen pro Nachricht).
+* **Build/Repo**: .sln-Struktur, App-Projekt (Avalonia), Backend-Ordner (agent_core, routes, main, etc.). Docker-Compose für Backend.
+
+## 3) UI/UX-Status
+
+* **Tabs & Layout**
+
+  * **Dashboard**: Systemstatus/Überblick (rudimentär).
+  * **KI-System**: Chat-Surface + Visualisierung interner Stränge (teils noch textuell/logzeilenbasiert).
+  * **Docker**: Start/Stop, Log-Einsicht, zwei Fenster/Pane-Bereiche.
+  * **Projekt**: erste Dateiansichten/Platzhalter für spätere App-Creation-Flows.
+  * **Blockchain**: UI-Skelett für Mega-Node-Steuerung.
+* **Behobene Bugs (laut deinem Update)**
+
+  * **UI-Layout-Sprung**: gefixt.
+  * **Expand/Collapse-Buttons**: gefixt.
+* **Bekannte UI-Stellen mit Historie**
+
+  * Grid/Bindings (Top-/Bottom-Pane, Row/Col-Heights).
+  * Sichtbarkeits-Kopplung zwischen Tabs (früher: Docker-Pane schob anderes Layout).
+
+## 4) Agenten/HMA/SoM
+
+* **Leitidee**: Society-of-Mind mit **HMA (Haupt-Meta-Agent)** als „Ich-Stimme“ (SOM-Core), die plant & finalisiert.
+* **Threads T1–T6** (Systemrollen sind gesetzt/reserviert):
+
+  * **T1** Dialog (User-Kanal),
+  * **T2** Innere Stimme / parallele Demos,
+  * **T3** Meta-Entscheidung/Router/Speaker,
+  * **T4** Librarian (Abruf, Einordnung, Wissensspeicher),
+  * **T5** TaskManager (Routing zu Funktionskanälen),
+  * **T6** Trainer/Verbesserung.
+* **Router**: wählt Demo-Agents (Critic/Programmer/Strategist/…) je Kontext;
+* **Speaker**: formt finalen Output + `deliver_to` (user | task | lib | trn).
+* **Konfig-Bausteine**: `HMAConfig` (System-Prompt, Templates für Plan/Final, Capabilities, max_parallel_targets).
+
+## 5) Backend-Status
+
+* **FastAPI Uvicorn-Stack** läuft; Logs zeigen sauberen Startup + Watcher für Codepfade.
+* **WebSocket-Route** für Live-Events/Logs aktiv.
+* **Problemhistorik**
+
+  * Exceptions (h11_impl / Starlette/ASGI Tracebacks) traten in Vorversionen auf.
+  * **Zep Persist**: `400 bad request: message content exceeds 2500 characters` → heute noch relevante Rahmenbedingung.
+  * **Namensauflösung im KI-Tab**: Fall „Du heißt T1_ROOT Channel“ tauchte in Logs auf (UI zeigte es korrekt, KI-System-Tab früher teils inkonsistent).
+  * **Using/Namespace-Fehler** (z. B. `AIClientService` fehlende Referenzen) beim App-Build gesichtet.
+
+## 6) Logs & Terminals
+
+* **Docker-Log-Anzeige**: zwei getrennte Fenster/Pane, live feed.
+* **In-App-Terminal-Feeling**: vorgesehen; heute v. a. Logviews + Buttons (Start/Stop/Build).
+* **Watcher**: Backend meldete „Watcher gestartet“ (Verzeichnis-Überwachung).
+
+## 7) Code-Gesundheit & Refactoring-Stand
+
+* **Zielsetzung**: ~**30 % Code-Volumen** bei gleicher Wirkung (Entfernen von Redundanzen, ungenutzten Pfaden, Fallbacks).
+* **Status**: begonnen; **Nebenwirkung**: „vieles verschwunden/kaputt“ (bekannt, wird von dir bewusst neu geordnet).
+* **Hotspots** (historisch):
+
+  * Doppelte Logik (Router/HMA in mehreren Dateien/Schichten),
+  * UI-Bindings (GridLength vs String),
+  * Commands ohne Hook im ViewModel,
+  * Unklare Sichtbarkeitssteuerung zwischen Tabs.
+
+## 8) Qualitätsmerkmale/Ziele (Definition of Ready für künftige Schritte)
+
+* **Stabile UI-Pane-Logik** (kein Durchschlagen zwischen Tabs; Bindings konsistent).
+* **Eindeutige Zuständigkeiten** (Router vs Speaker vs TaskManager klar getrennt).
+* **Sichere Memory-Schnittstellen** (Chunking, Längenbegrenzung, saubere Persist-Pfade).
+* **Fehlerarme Build-Pipelines** (.csproj-Referenzen, Namespaces, Restore → Build → Run).
+* **Observability** (einheitliche Log-Formate, klare Prefixe je Thread T1–T6).
+
+---
+
+# Vision — wohin das GatewayIDE steuert
+
+## 1) Kurzfristiges Zielbild (Innenwelt-Reife)
+
+* **Transparente SoM-Visualisierung**: T1–T6 als lebendige, filterbare Streams (Plan → Entscheidung → Output).
+* **Task-Flows**: Klar trennbar (user/task/lib/trn) mit auditierbaren Spuren (wer hat was entschieden, auf Basis welcher Kontexte).
+* **Robuste Speicher-Anbindung**: Stabiler Umgang mit großen Kontexten (Chunking, Summarizer-Wege, Limits sichtbar im UI).
+* **Sauberes Code-Skelett**: Minimal, aber erweiterbar; klare Schnittstellen; testbar.
+
+## 2) Mittelfrist (Ökosystem-Andockpunkte)
+
+* **Projekt-Tab als „Creation-Hub“**: Projekt-Boilerplates, Mini-Games (Tamagotchi-Loops), Skript-Templates.
+* **Blockchain-Tab**: Mega-Node-Start/Monitoring, Statusmetriken, eventuelle Backpressure-Signale ins HMA.
+* **Wissensflächen**: Librarian-Ansicht (Quellen, Snippets, Zep-Graph-Ausschnitte), kuratierte Memory-Einspeisung.
+
+## 3) Langfrist (Gesamtvision)
+
+* **Exodus-Integration**: Lernwelten & Rollen, globale Identität als Zugangs-/Rechte-Layer.
+* **S.A.A.I.-Pfad**: Simulation/Training mit UE-Anbindung, Echtzeit-Signale zwischen Engine und HMA-Threads.
+* **„Welt-Konsole“**: Das IDE wird Leitstand für Bildung/Ökonomie/Kommunikation im GSE-Konzept — mit klarer Trennung von Innenwelt (Denken/Planen) und Außenwelt (Liefern/Wirken).
+
+---
+
+# Offene Punkte (bekannte „Loose Ends“)
+
+* **Persist-Strategie** für lange Nachrichten (Zep-Limits → Chunking/Summarize-Pfade).
+* **Namensraum/Referenzen** in der App (AIClientService & Co.).
+* **Thread-Transparenz** im UI (Filter, Timeline, Zustandswechsel klar erkennbar).
+* **Sichtbarkeit/State-Management** (Tabs beeinflussen sich gegenseitig nicht).
+* **Minimal-Core nach Refactoring** (stabile Baseline, bevor Erweiterungen kommen).
+
+---
+
+# TL;DR
+
+* **GatewayIDE** ist dein **Innenwelt-Leitstand**: Denken, Planen, Orchestrieren, Beobachten.
+* **Aktueller Stand**: UI-Kern funktioniert, kritische Bugs (Layout/Expand) von dir gefixt; Refactoring auf 30 % läuft, hat aber Substanz entfernt → geplanter Neuaufbau/Sortierung.
+* **Vision**: klare SoM-Transparenz, robuste Speicher-/Task-Pipelines, anschließende Erweiterungen (Projekt-Creation, Mega-Node, Exodus, S.A.A.I.).
+
+Wenn du magst, halte ich dir diesen Status als **„Stand-Dokument“** fest (später leicht erweiterbar um Checklisten). Sag nur Bescheid — ich schreibe es dir 1:1 in eine saubere, druckfähige Fassung.
