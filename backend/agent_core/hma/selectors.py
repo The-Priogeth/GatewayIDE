@@ -12,21 +12,60 @@ _CLAIM_PATTERNS = [
 
 def select_demos(user_text: str, context: str, demos: Iterable[Any]) -> list[Any]:
     """
-    Mini-Heuristik:
-    - Nimmt alle Demos, die ein optionales Attribut `accept(user_text, context)` True liefern.
-    - Falls kein Demo ein accept hat/True ist: nimm alle (deterministisch stabil).
+    Regeln:
+    - PersonalAgent IMMER dabei (Name/Profil, leichte Smalltalks).
+    - Programmer nur bei Code/Fehler/Logs.
+    - Strategist bei Planung, Struktur, Roadmaps.
+    - Critic bei 'prüfe', 'kritisiere', 'review'.
+    - Therapist bei 'ich fühle', 'stress', 'überfordert', 'hilfe' etc.
+    Falls ein Demo eine accept(user_text, context) anbietet → das überschreibt die Heuristik für dieses Demo.
     """
+    t = f"{user_text}\n{context}".lower()
+
+    def has(name: str) -> Any | None:
+        for d in demos:
+            if getattr(d, "name", "").lower() == name.lower():
+                return d
+        return None
+
     chosen: list[Any] = []
+    pa = has("PersonalAgent")
+    if pa: chosen.append(pa)
+
+    # Hooks der Demos respektieren
     for d in demos:
-        ok = getattr(d, "accept", None)
         try:
-            if callable(ok) and ok(user_text, context):
-                chosen.append(d)
+            fn = getattr(d, "accept", None)
+            if callable(fn) and fn(user_text, context):
+                if d not in chosen:
+                    chosen.append(d)
         except Exception:
             pass
-    if not chosen:
-        chosen = list(demos)
-    return chosen
+
+    # Heuristische Ergänzungen
+    if any(k in t for k in ["error", "traceback", "stack", "compile", "build", "docker", "compose", "code", "funktion", "methode", "klasse"]):
+        dp = has("DemoProgrammer")
+        if dp and dp not in chosen:
+            chosen.append(dp)
+
+    if any(k in t for k in ["plan", "strategie", "priorisiere", "roadmap", "ziel", "meilenstein"]):
+        ds = has("DemoStrategist")
+        if ds and ds not in chosen:
+            chosen.append(ds)
+
+    if any(k in t for k in ["prüfe", "review", "kritik", "kritisiere", "gegencheck"]):
+        dc = has("DemoCritic")
+        if dc and dc not in chosen:
+            chosen.append(dc)
+
+    if any(k in t for k in ["ich fühle", "überfordert", "angst", "hilfe", "therapie", "emotional"]):
+        dt = has("DemoTherapist")
+        if dt and dt not in chosen:
+            chosen.append(dt)
+
+    # Fallback: mindestens PersonalAgent
+    return chosen or ([pa] if pa else list(demos))
+
 
 def aggregate(pairs: list[Tuple[str, str]]) -> str:
     """
@@ -61,3 +100,24 @@ def build_findings(pairs: List[Tuple[str, str]]) -> str:
         best = max(counts.items(), key=lambda kv: kv[1])
         lines.append(f"- **{kind}**: {best[0]}")
     return "\n".join(lines)
+
+# am Ende von backend/agent_core/selectors.py
+
+def selector1(user_text: str, context: str, demos) -> list:
+    """
+    Upstream-Auswahl (leichtgewichtig; dein Wunsch: gpt-3.5 möglich).
+    Für jetzt: nutze bestehende Heuristik, identisch zu select_demos.
+    """
+    return select_demos(user_text, context, demos)
+
+def selector2(ich_text: str) -> str:
+    """
+    Downstream-Auswahl des Adressaten.
+    Hier könnten wir später LLM-Kriterien / Regelwerke nutzen.
+    Für jetzt: Route-Parsing bleibt im HMA; selector2 ist Hook.
+    Gibt 'user'|'task'|'lib'|'trn' zurück (kompatibel zu routing.py).
+    """
+    # Minimal: wir lassen routing.parse_deliver_to im HMA entscheiden
+    # und nutzen diesen Hook künftig, sobald du Regeln definierst.
+    # Für jetzt geben wir einen Dummy zurück (wird nicht verwendet).
+    return "user"

@@ -1,7 +1,7 @@
 # backend/agent_core/hma/routing.py
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Literal, Any
+from typing import Literal, Any, cast
 import json
 import re
 
@@ -30,9 +30,23 @@ _ROUTE_JSON_FALLBACK = re.compile(
     flags=re.DOTALL,
 )
 
+_ROUTE_MARKERS_RX = re.compile(r'<<<ROUTE>>>\s*\{.*?\}\s*<<<END>>>', re.DOTALL)
+
 # -------------------------------------------------------------
 # Hilfsfunktionen
 # -------------------------------------------------------------
+
+def strip_route_markers(text: str) -> str:
+    """
+    Entfernt sichtbare ROUTE-Marker aus beliebigem Text.
+    - löscht <<<ROUTE>>> {...} <<<END>>> 
+    - entfernt ggf. ```json ... ``` fences
+    """
+    if not text:
+        return ""
+    txt = _strip_code_fences(text)
+    return _ROUTE_MARKERS_RX.sub("", txt).strip()
+
 def _strip_code_fences(text: str) -> str:
     """Entfernt Markdown-Codeblöcke ```json ... ``` oder ``` ... ```"""
     return re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", text, flags=re.IGNORECASE)
@@ -90,6 +104,17 @@ def parse_deliver_to(raw: Any) -> Route:
 # -------------------------------------------------------------
 # Thread-Mapping
 # -------------------------------------------------------------
+
+def to_target(x) -> Target:
+    """
+    Konvertiert beliebige Eingaben (None/str/obj) in einen gültigen Target-Literal.
+    Fallback = "user".
+    """
+    s = (str(x).lower().strip()) if x is not None else "user"
+    if s in ("user", "task", "lib", "trn"):
+        return cast(Target, s)
+    return cast(Target, "user")
+
 def map_target_to_thread(target: Target) -> str:
     """Zuordnung Ziel → Thread-ID (T1–T6)"""
     return {

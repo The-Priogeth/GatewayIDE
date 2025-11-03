@@ -1,3 +1,5 @@
+from __future__ import annotations
+from backend.memory.memory import ZepMemory as _ZepMemory
 """
 Zep Memory integration for AutoGen.
 
@@ -21,6 +23,11 @@ from autogen_core.models import SystemMessage
 from zep_cloud.client import AsyncZep
 from zep_cloud.types import Message
 
+
+# Keep the historic name for downstream code:
+class ZepUserMemory(_ZepMemory):
+    """Compatibility alias for backend.memory.memory.ZepMemory."""
+    pass
 
 class ZepUserMemory(Memory):
     """

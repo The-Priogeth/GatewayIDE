@@ -1,15 +1,12 @@
 from .exceptions import ZepDependencyError
 
 try:
-    # Check for required AutoGen dependencies - just test import
-    import autogen_core.memory  # noqa: F401
-    import autogen_core.model_context  # noqa: F401
-
     from .graph_memory import ZepGraphMemory
-
-    # Import our integration
     from .memory import ZepUserMemory
-    from .tools import create_add_graph_data_tool, create_search_graph_tool
+    from .tools import (create_add_graph_data_tool,
+                        create_search_graph_tool,
+                        search_memory,
+                        add_graph_data,)
 
     __all__ = [
         "ZepUserMemory",
@@ -17,6 +14,8 @@ try:
         "create_search_graph_tool",
         "create_add_graph_data_tool",
         "ZepDependencyError",
+        "search_memory",
+        "add_graph_data",
     ]
 
 except ImportError as e:

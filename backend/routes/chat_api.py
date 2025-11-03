@@ -1,39 +1,32 @@
-# backend/routes/chat_api.py
 from __future__ import annotations
-
-from typing import Any, Dict
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from autogen_core.memory import MemoryContent, MemoryMimeType
 
-router = APIRouter(tags=["chat"])
+router = APIRouter()
+
+class ChatRequest(BaseModel):
+    prompt: str
 
 @router.post("/chat")
-async def chat(request: Request) -> JSONResponse:
-    # JSON lesen
-    try:
-        payload: Dict[str, Any] = await request.json()
-    except Exception:
-        return JSONResponse({"detail": "Invalid JSON body"}, status_code=400)
+async def chat(req: ChatRequest, request: Request):
+    rt = request.app.state.runtime
+    t1_mem = rt.t1_memory
+    ctxprov = rt.ctx_provider
+    hma = rt.hma
 
-    # Back-compat: text/message -> prompt
-    if "prompt" not in payload:
-        for k in ("text", "message"):
-            if isinstance(payload.get(k), str):
-                payload["prompt"] = payload.pop(k)
-                break
-    if not isinstance(payload.get("prompt"), str):
-        return JSONResponse({"detail": "Missing 'prompt' (or 'text')"}, status_code=400)
+    # 1) Prompt -> T1
+    await t1_mem.add(MemoryContent(
+        content=req.prompt,
+        mime_type=MemoryMimeType.TEXT,
+        metadata={"type":"message","role":"user","name":"User","thread":"T1"},
+    ))
 
-    # Manager ziehen
-    hub = getattr(request.app.state, "hub", None)
-    if not hub:
-        return JSONResponse({"detail": "Hub not available"}, status_code=503)
+    # 2) Kontext
+    if hasattr(ctxprov, "refresh"):
+        await ctxprov.refresh()
+    ctx = ctxprov.get() if hasattr(ctxprov, "get") else None
 
-    # Ein Turn, brain-first; Debug via payload.debug
-    res = await hub.group_once(
-        goal=payload["prompt"],
-        deliverables=payload.get("deliverables"),
-        constraints=payload.get("constraints"),
-        extra_ctx={"debug": bool(payload.get("debug"))},
-    )
-    return JSONResponse(content=res, status_code=200)
+    # 3) HMA-Zyklus → Envelope (Speaker ist intern)
+    envelope = await hma.run_inner_cycle(req.prompt, ctx)
+    return envelope

@@ -24,9 +24,6 @@ from zep_cloud.client import AsyncZep
 from backend.memory.memory_zep_thread import ZepThreadMemory
 from backend.memory.memory_zep_graph import ZepGraphAdmin
 
-import os
-from zep_cloud.core.api_error import ApiError
-
 class ZepMemory(Memory):
     def __init__(
         self,
@@ -145,21 +142,58 @@ class ZepMemory(Memory):
         else:
             q = query
 
-        limit = kwargs.pop("limit", 5)
+        # ---- Erlaubte/typisierte Such-Parameter aus kwargs holen
+        raw_limit = kwargs.pop("limit", 5)
+        raw_scope = kwargs.pop("scope", None)
+        raw_filters = kwargs.pop("search_filters", None)
+        raw_min_rating = kwargs.pop("min_fact_rating", None)
+        raw_reranker = kwargs.pop("reranker", None)
+        raw_center_uuid = kwargs.pop("center_node_uuid", None)
+        # Alles andere ignorieren (verhindert Positions-/Typ-Drift)
+
+        # Typguards (Pylance-freundlich)
+        limit: int = int(raw_limit) if isinstance(raw_limit, (int, float, str)) and str(raw_limit).isdigit() else 5
+        scope: str | None = raw_scope if isinstance(raw_scope, str) else None
+        search_filters: dict[str, Any] | None = raw_filters if isinstance(raw_filters, dict) else None
+        min_fact_rating: float | None = float(raw_min_rating) if isinstance(raw_min_rating, (int, float)) else None
+        reranker: str | None = raw_reranker if isinstance(raw_reranker, str) else None
+        center_node_uuid: str | None = raw_center_uuid if isinstance(raw_center_uuid, str) else None
+
         results: list[MemoryContent] = []
 
         try:
-            graph_results = await self._graph.search(q, limit=limit, **kwargs)
+            # Nur gültige Keys setzen → kein falscher Typ in die Signatur
+            search_args: dict[str, Any] = {"query": q, "limit": limit}
+            if scope is not None:
+                search_args["scope"] = scope
+            if search_filters is not None:
+                search_args["search_filters"] = search_filters
+            if min_fact_rating is not None:
+                search_args["min_fact_rating"] = min_fact_rating
+            if reranker is not None:
+                search_args["reranker"] = reranker
+            if center_node_uuid is not None:
+                search_args["center_node_uuid"] = center_node_uuid
 
-            edges = getattr(graph_results, "edges", None) or []
-            for edge in edges:
+            graph_results = await self._graph.search(
+                query=q,
+                limit=limit,
+                scope=scope,
+                search_filters=search_filters,
+                min_fact_rating=min_fact_rating,
+                reranker=reranker,
+                center_node_uuid=center_node_uuid,
+            )
+
+            # ---- Edges → MemoryContent
+            for edge in (getattr(graph_results, "edges", []) or []):
                 results.append(
                     MemoryContent(
-                        content=edge.fact,
+                        content=getattr(edge, "fact", ""),
                         mime_type=MemoryMimeType.TEXT,
                         metadata={
                             "source": "user_graph",
-                            "edge_name": edge.name,
+                            "edge_name": getattr(edge, "name", None),
                             "edge_attributes": getattr(edge, "attributes", {}) or {},
                             "created_at": getattr(edge, "created_at", None),
                             "expired_at": getattr(edge, "expired_at", None),
@@ -168,22 +202,24 @@ class ZepMemory(Memory):
                         },
                     )
                 )
-            nodes = getattr(graph_results, "nodes", None) or []
-            for node in nodes:
+
+            # ---- Nodes → MemoryContent
+            for node in (getattr(graph_results, "nodes", []) or []):
                 results.append(
                     MemoryContent(
-                        content=f"{node.name}:\n {getattr(node, 'summary', '')}",
+                        content=f"{getattr(node, 'name', '')}:\n {getattr(node, 'summary', '')}",
                         mime_type=MemoryMimeType.TEXT,
                         metadata={
                             "source": "user_graph",
-                            "node_name": node.name,
+                            "node_name": getattr(node, "name", None),
                             "node_attributes": getattr(node, "attributes", {}) or {},
                             "created_at": getattr(node, "created_at", None),
                         },
                     )
                 )
-            episodes = getattr(graph_results, "episodes", None) or []
-            for episode in episodes:
+
+            # ---- Episodes → MemoryContent
+            for episode in (getattr(graph_results, "episodes", []) or []):
                 results.append(
                     MemoryContent(
                         content=getattr(episode, "content", ""),
@@ -196,10 +232,14 @@ class ZepMemory(Memory):
                         },
                     )
                 )
+
         except Exception as e:
             self._logger.error(f"Error querying Zep memory: {e}")
 
         return MemoryQueryResult(results=results)
+
+
+
 
     async def update_context(self, model_context: ChatCompletionContext) -> UpdateContextResult:
         try:
@@ -239,3 +279,108 @@ class ZepMemory(Memory):
     async def close(self) -> None:
         # client lifecycle is managed by caller
         pass
+
+
+# --- NEU in class ZepMemory ---------------------------------
+
+    def adopt_graph_id(self, graph_id: str) -> None:
+        """Setzt den Ziel-Graph für Reads/Writes. Entfernen per None."""
+        self._graph_id = str(graph_id).strip() if graph_id else None
+
+    async def get_context(
+        self,
+        include_recent: bool = True,
+        graph: bool = False,
+        graph_filters: dict[str, Any] | None = None,
+        recent_limit: int = 10,
+    ) -> str:
+        """Baut einen kompakten Kontextstring: Thread-Block (+ optional Graph-Snippet)."""
+        parts: list[str] = []
+
+        # Thread-Kontext
+        try:
+            if include_recent and self._thread:
+                block = await self._thread.build_context_block(
+                    include_recent=True, recent_limit=recent_limit
+                )
+                if block:
+                    parts.append(block)
+        except Exception as e:
+            self._logger.debug(f"thread-context skipped: {e}")
+
+        # Optional: Graph-Snippet
+        if graph and getattr(self, "_graph", None):
+            try:
+                params: dict[str, Any] = {"limit": 5}
+                if graph_filters:
+                    params.update(graph_filters)
+
+                target_graph_id = getattr(self, "_graph_id", None)
+                if target_graph_id:
+                    ga = ZepGraphAdmin(self._client, graph_id=target_graph_id)
+                else:
+                    ga = ZepGraphAdmin(self._client, user_id=self._user_id)
+
+                res = await ga.search(query="*", **params)
+
+                lines: list[str] = []
+                for e in (getattr(res, "edges", []) or [])[:5]:
+                    lines.append(f"- {getattr(e, 'fact', '')}".strip())
+                for n in (getattr(res, "nodes", []) or [])[:3]:
+                    nm = getattr(n, "name", "")
+                    sm = getattr(n, "summary", "") or ""
+                    lines.append(f"- {nm}: {sm}".strip())
+                if lines:
+                    parts.append("Memory graph (compact):\n" + "\n".join(lines))
+            except Exception as e:
+                self._logger.debug(f"graph-context skipped: {e}")
+
+
+        ctx = "\n\n".join([p for p in parts if p and p.strip()]) or ""
+        return ctx
+
+    async def add_message(
+        self,
+        role: str,
+        text: str,
+        name: str | None = None,
+        *,
+        also_graph: bool = False,
+    ) -> None:
+        """Einheitlicher Schreibpfad für Speaker/Demos (Thread-first, optional Graph-Duplikat)."""
+        r = (role or "user").lower().strip()
+        if r == "assistant":
+            await self._thread.add_assistant_message(text, name=name)
+        elif r == "system":
+            await self._thread.add_system_message(text, name=name)
+        else:
+            await self._thread.add_user_message(text, name=name)
+
+        # Optionales Duplikat in Graph (bewusst „später“ nutzbar)
+        if also_graph and not self._thread.is_local:
+            try:
+                # Ziel-Admin passend binden (graph_id bevorzugt, sonst user_id)
+                target_graph_id = getattr(self, "_graph_id", None)
+                if target_graph_id:
+                    ga = ZepGraphAdmin(self._client, graph_id=target_graph_id)
+                else:
+                    ga = ZepGraphAdmin(self._client, user_id=self._user_id)
+
+                await ga.add_raw_data(
+                    user_id=self._user_id,
+                    data_type="text",
+                    data=str(text),
+                )
+            except Exception as e:
+                self._logger.debug(f"graph-add skipped: {e}")
+
+# Convenience re-exports (optional)
+try:
+    from backend.memory.memory_tools import (
+        search_memory,
+        add_graph_data,
+        create_search_graph_tool,
+        create_add_graph_data_tool,
+    )
+except Exception:
+    pass

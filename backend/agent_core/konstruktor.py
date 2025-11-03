@@ -1,15 +1,20 @@
 # backend/agent_core/konstruktor.py
 from __future__ import annotations
+from typing import Any, Iterable
+from backend.agent_core.hma.hma import HMA
+from backend.agent_core.hma.speaker import Speaker
+from backend.agent_core.hma.hma_config import HMAConfig
 
 __all__ = ["build_hma"]
 
-def build_hma(*, demo_registry, llm_client):
-    from backend.agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
-    from backend.agent_core.hma.hma import HMA
+def build_hma(*, runtime, llm_client, demo_registry, config: HMAConfig) -> HMA:
+    speaker = Speaker(runtime=runtime)
     return HMA(
-        som_system_prompt=DEFAULT_HMA_CONFIG.som_system_prompt,
-        templates=DEFAULT_HMA_CONFIG,
+        som_system_prompt=config.som_system_prompt,
+        templates=config,
         demos=demo_registry,
-        messaging=__import__("backend.agent_core.messaging", fromlist=[""]),
+        messaging=runtime.messaging,
         llm=llm_client,
+        speaker=speaker,
+        ctx_provider=getattr(runtime, "ctx_provider", None),  # <<<< NEU
     )

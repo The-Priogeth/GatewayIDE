@@ -542,7 +542,19 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     #region ===== Prozess-Helfer =====
 
     private Process RunDocker(string args)
-        => GatewayIDE.App.Services.Processes.ProcessManager.StartProcess("docker", args, RepoDeployDir());
+    {
+        var psi = new ProcessStartInfo("docker", args)
+        {
+            WorkingDirectory = RepoDeployDir(),
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+        var p = Process.Start(psi)!;
+        return p;
+    }
+
 
     private void AttachToDocker(Process p, string tag, bool mirrorErrToOut = false)
     {

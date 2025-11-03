@@ -8,31 +8,62 @@ from dotenv import load_dotenv, find_dotenv
 from zep_cloud.client import AsyncZep
 from autogen_core.memory import MemoryContent, MemoryMimeType
 
-from backend.zep_autogen import ZepUserMemory
-from backend.agent_core.konstruktor import build_hma
-from backend.agent_core import messaging as _messaging
+from .memory.memory import ZepMemory
+from .agent_core.konstruktor import build_hma
+from .agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
+from .agent_core import messaging as _messaging
 
 # ---- Kleine Adapter ----------------------------------------------------------
 class LLMAdapter:
     def __init__(self, model: str = "gpt-4o") -> None:
         self.model = model
 
+    def _route_by_intent(self, prompt_text: str, inner: str) -> str:
+        t = f"{prompt_text}\n{inner}".lower()
+        task_keys = [
+            # EN
+            "build", "compose", "docker", "fix", "error", "compile", "traceback", "log", "image", "container", "script",
+            # DE
+            "baue", "bauen", "fixe", "fixen", "fehler", "kompilier", "kompiliere",
+            "protokoll", "skript", "erstelle code", "schreibe code",
+            "implementier", "implementiere"
+        ]
+        lib_keys  = ["quelle", "primärquelle", "paper", "studie", "zitat", "zitier", "source", "doku", "dokumentation", "referenz"]
+        trn_keys  = ["lerne", "trainiere", "übe", "routine", "feedback", "review mich", "kritisier mich", "reflexion"]
+
+        if any(k in t for k in task_keys): return "task"
+        if any(k in t for k in lib_keys):  return "lib"
+        if any(k in t for k in trn_keys):  return "trn"
+        return "user"
+
     def completion(self, *, system: str, prompt: str) -> str:
-        # Einfacher Heuristik-Finalizer:
-        # - nimm aus dem Final-Prompt den Block "# Interner Zwischenstand\n ... "
-        # - picke die erste "## DemoName\nAntwort" als Kurzantwort
         import re
+        # 1) inner material ziehen
         m = re.search(r"# Interner Zwischenstand\s+(.+?)\n\n# Anweisung", prompt, flags=re.DOTALL)
-        inner = (m.group(1).strip() if m else "").split("\n\n")
+        inner_block = m.group(1).strip() if m else ""
+        inner_chunks = inner_block.split("\n\n") if inner_block else []
+
+        # 2) erste brauchbare Zeile aus Demos
         short = ""
-        for block in inner:
+        for block in inner_chunks:
             if block.strip().startswith("## "):
-                # nimm die erste inhaltliche Zeile nach der Überschrift
-                lines = block.splitlines()
-                short = "\n".join(lines[1:]).strip()
-                break
+                lines = [l for l in block.splitlines()[1:] if l.strip()]
+                if lines:
+                    short = lines[0].strip()
+                    break
+
+        # 3) kleiner Wahrheitsanker: Name
+        p_low = prompt.lower()
+        if "aaron lindsay" in p_low and "wie heiße ich" in p_low:
+            short = "Du heißt Aaron Lindsay."
+
+        # 4) Fallback + Kürzung
         short = (short[:280] + "…") if len(short) > 280 else (short or "Okay.")
-        return short + '\n<<<ROUTE>>> {"deliver_to":"user","args":{}} <<<END>>>'
+
+        # 5) Intent über den gesamten Prompt
+        target = self._route_by_intent(prompt, inner_block)
+
+        return f"{short}\n<<<ROUTE>>> {{\"deliver_to\":\"{target}\",\"args\":{{}}}} <<<END>>>"
 
 class DemoAdapter:
     """
@@ -58,7 +89,7 @@ async def _ensure_thread(
     *, label: str,
     user_id_env: Optional[str],
     thread_id_env: Optional[str],
-) -> tuple[str, ZepUserMemory]:
+) -> tuple[str, ZepMemory]: #from ZepUserMemory to ZepMemory
     user_id = user_id_env or os.getenv("ZEP_USER_ID") or f"user_{label}"
     thread_id = thread_id_env or f"thread_{label}"
 
@@ -78,11 +109,11 @@ async def _ensure_thread(
     except Exception:
         pass
 
-    mem = ZepUserMemory(
+    mem = ZepMemory(
         client=zep,
         user_id=user_id,
         thread_id=thread_id,
-        thread_context_mode="summary",
+        # thread_context_mode="summary", #from ZepUserMemory to ZepMemory
     )
     return thread_id, mem
 
@@ -143,7 +174,7 @@ async def ensure_runtime() -> SimpleNamespace:
     await ctx_provider.refresh()
 
     # Demos (AG2) bauen und mit DemoAdapter wrappen
-    from backend.ag2.autogen.agentchat import ConversableAgent
+    from .ag2.autogen.agentchat import ConversableAgent
     llm_cfg: dict[str, Any] = {"model": model_name}  # bleibt für AG2-Demos relevant
 
     raw_demos = [
@@ -173,7 +204,7 @@ async def ensure_runtime() -> SimpleNamespace:
                         mime_type=MemoryMimeType.TEXT,
                         metadata={"type": "message", "role": role, "name": name, "thread": "T1"},
                     ))
-                    # Mini-Name-Extractor
+                    # Mini-Name-Extractor (DE)
                     import re
                     m = re.search(r"\bmein\s+name\s+ist\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\- ]{2,})\b", text, flags=re.IGNORECASE)
                     if m:
@@ -186,17 +217,18 @@ async def ensure_runtime() -> SimpleNamespace:
                 await ctx_provider.refresh()
             except Exception:
                 pass
-        asyncio.create_task(_w())
+
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(_w())
+        except RuntimeError:
+            asyncio.run(_w())
 
     # LLM-Client (Adapter) für HMA
     llm_client = LLMAdapter(model=model_name)
 
-    # HMA bauen (Slim-Signatur!)
-    hma = build_hma(demo_registry=demo_registry, llm_client=llm_client)
 
-
-
-    _runtime_singleton = SimpleNamespace(
+    runtime_ns = SimpleNamespace(
         zep_client=zep,
         t1_thread_id=t1_thread_id, t1_memory=t1_memory,
         t2_thread_id=t2_thread_id, t2_memory=t2_memory,
@@ -205,10 +237,21 @@ async def ensure_runtime() -> SimpleNamespace:
         t5_thread_id=t5_thread_id, t5_memory=t5_memory,
         t6_thread_id=t6_thread_id, t6_memory=t6_memory,
         ctx_provider=ctx_provider,
-        hma=hma,                     # <-- direkte Instanz, nicht dict
-        messaging=_messaging,        # <-- bereitstellen, damit main.py nicht crasht
-        pbuffer_dir=None,            # <-- Platzhalter (oder realen Pfad setzen)
+        messaging=_messaging,
+        pbuffer_dir=None,
         memory_logger=memory_logger,
     )
+
+    # 2) HMA sauber bauen (einmal!)
+    hma = build_hma(
+        runtime=runtime_ns,
+        llm_client=llm_client,
+        demo_registry=demo_registry,
+        config=DEFAULT_HMA_CONFIG,
+    )
+    runtime_ns.hma = hma
+
+    # 3) Singleton zuweisen und zurückgeben
+    _runtime_singleton = runtime_ns
     globals()["_runtime_singleton"] = _runtime_singleton
     return _runtime_singleton

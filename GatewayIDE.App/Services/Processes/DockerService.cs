@@ -134,9 +134,21 @@ namespace GatewayIDE.App.Services.Processes
         }
 
 
+        // oben neben den anderen Konstanten:
+        private const string DefaultComposeFile = "gateway-compose.yml";
+
+        // kleine Helper-Methode:
+        private static string ComposePath()
+        {
+            var env = Environment.GetEnvironmentVariable("GATEWAY_COMPOSE_PATH");
+            return string.IsNullOrWhiteSpace(env) ? DefaultComposeFile : env;
+        }
+
         // Hilfsfunktion für docker compose
         private static Task<int> ComposeAsync(string args, Action<string>? o = null, Action<string>? e = null, CancellationToken ct = default)
-            => RunAsync("docker", $"compose -f \"{ComposeFile}\" {args}", o, e, ct);
+            => RunAsync("docker", $"compose -f \"{ComposePath()}\" {args}", o, e, ct);
+
+
 
         // ---- Einzeloperationen ------------------------------------------------
 
@@ -236,8 +248,6 @@ namespace GatewayIDE.App.Services.Processes
             // bash -lc erlaubt Pipes, &&, Aliases etc.
             return RunAsync("docker", $"exec {container} bash -lc \"{escaped}\"", o, e, ct);
         }
-
-
 
 
 

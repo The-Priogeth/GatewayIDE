@@ -1,3 +1,4 @@
+#if ENABLE_GRPC
 using Grpc.Net.Client;
 using Gateway.AI.V1;
 
@@ -20,10 +21,10 @@ public sealed class AIClientService : IAsyncDisposable
         return reply.Text;
     }
 
-    // ShutdownAsync gibt es bei Grpc.Net.Client nicht – Dispose genügt
     public ValueTask DisposeAsync()
     {
         _channel.Dispose();
         return ValueTask.CompletedTask;
     }
 }
+#endif

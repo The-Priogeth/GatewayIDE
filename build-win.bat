@@ -98,12 +98,9 @@ rem === Nach erfolgreichem Build: EXE starten ===
 if exist "%OUTEXE%" (
   echo [RUN] Starte GatewayIDE ...
   pushd "%OUTDIR%"
-  "GatewayIDE.App.exe"
+  start "" "GatewayIDE.App.exe"
   popd
-  echo.
-  echo [INFO] GatewayIDE wurde beendet. Druecke ENTER, um dieses Fenster zu schliessen...
-  pause >nul
-  goto :EOF
+  exit /b 0
 ) else (
   echo [WARN] Konnte EXE nicht finden: "%OUTEXE%"
   goto :END
