@@ -7,7 +7,6 @@ import json
 
 from loguru import logger
 # 🔧 Hilfsfunktion importieren (aus agent_core/core.py)
-from agent_core.konstruktor import load_agent_profile
 
 router = APIRouter(prefix="/api/agents", tags=["Agents"])
 

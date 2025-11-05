@@ -37,8 +37,6 @@ async def lifespan(app: FastAPI):
     app.state.t5_thread_id = runtime.t5_thread_id
     app.state.t6_thread_id = runtime.t6_thread_id
 
-    app.state.ctx_provider = runtime.ctx_provider
-
     # 🔁 WICHTIG: Slim-HMA legt HMA direkt ab – KEIN dict mehr
     app.state.hma          = runtime.hma            # direkte HMA-Instanz
     app.state.messaging    = runtime.messaging

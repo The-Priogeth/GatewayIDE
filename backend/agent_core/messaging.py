@@ -30,10 +30,8 @@ def forward(envelope: Envelope) -> None:
     log(f"FORWARD {envelope.thread}: {asdict(envelope)}", scope="forward")
 
 def snapshot(text: str, *, to: str = "user", corr_id: str | None = None, dirpath: str | None = None) -> str:
-    """
-    Legt einen minimalen Text-Snapshot auf der Platte ab.
-    Gibt den Pfad zurück (für Debug/Telemetry).
-    """
+    if os.getenv("SNAPSHOT_ENABLED", "0") not in ("1", "true", "True"):  # <— Opt-in
+        return ""
     dirpath = dirpath or os.getenv("PBUFFER_DIR", "/app/pbuffer")
     try:
         os.makedirs(dirpath, exist_ok=True)

@@ -3,15 +3,19 @@ from __future__ import annotations
 import os, asyncio
 from types import SimpleNamespace
 from typing import Any, Awaitable, Optional, cast
-
 from dotenv import load_dotenv, find_dotenv
 from zep_cloud.client import AsyncZep
 from autogen_core.memory import MemoryContent, MemoryMimeType
-
 from .memory.memory import ZepMemory
-from .agent_core.konstruktor import build_hma
 from .agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
 from .agent_core import messaging as _messaging
+from .memory.manager import MemoryManager
+from .agent_core.hma.hma import HMA
+from .agent_core.hma.speaker import Speaker
+from contextvars import ContextVar
+
+# global
+corr_id_var: ContextVar[str] = ContextVar("corr_id", default="no-corr")
 
 # ---- Kleine Adapter ----------------------------------------------------------
 class LLMAdapter:
@@ -117,25 +121,7 @@ async def _ensure_thread(
     )
     return thread_id, mem
 
-class ContextProvider:
-    def __init__(self, *, zep: AsyncZep, thread_id: str, mode: str = "summary") -> None:
-        self._zep = zep
-        self._thread_id = thread_id
-        self._mode = mode
-        self._summary: str = ""
 
-    async def refresh(self) -> None:
-        try:
-            ctx = await self._zep.thread.get_user_context(thread_id=self._thread_id, mode=self._mode)
-            self._summary = (ctx.context or "").strip()
-        except Exception:
-            pass
-
-    def get(self) -> str:
-        return self._summary
-
-    def update(self, text: str) -> None:
-        self._summary = (text or "").strip()
 
 # ---- Runtime ---------------------------------------------------------------
 _runtime_singleton: SimpleNamespace | None = None
@@ -170,8 +156,7 @@ async def ensure_runtime() -> SimpleNamespace:
     t5_thread_id, t5_memory = await _ensure_thread(zep, label="t5_task_internal", user_id_env=base_user, thread_id_env=os.getenv("T5_THREAD_ID"))
     t6_thread_id, t6_memory = await _ensure_thread(zep, label="t6_trn_internal",  user_id_env=base_user, thread_id_env=os.getenv("T6_THREAD_ID"))
 
-    ctx_provider = ContextProvider(zep=zep, thread_id=t1_thread_id, mode="summary")
-    await ctx_provider.refresh()
+
 
     # Demos (AG2) bauen und mit DemoAdapter wrappen
     from .ag2.autogen.agentchat import ConversableAgent
@@ -214,7 +199,6 @@ async def ensure_runtime() -> SimpleNamespace:
                             mime_type=MemoryMimeType.TEXT,
                             metadata={"type": "message", "role": "system", "name": "Profile", "thread": "T1"},
                         ))
-                await ctx_provider.refresh()
             except Exception:
                 pass
 
@@ -223,6 +207,7 @@ async def ensure_runtime() -> SimpleNamespace:
             loop.create_task(_w())
         except RuntimeError:
             asyncio.run(_w())
+
 
     # LLM-Client (Adapter) für HMA
     llm_client = LLMAdapter(model=model_name)
@@ -236,20 +221,24 @@ async def ensure_runtime() -> SimpleNamespace:
         t4_thread_id=t4_thread_id, t4_memory=t4_memory,
         t5_thread_id=t5_thread_id, t5_memory=t5_memory,
         t6_thread_id=t6_thread_id, t6_memory=t6_memory,
-        ctx_provider=ctx_provider,
         messaging=_messaging,
         pbuffer_dir=None,
         memory_logger=memory_logger,
     )
+    # zentrale Memory-Fassade (einheitlicher Einstiegspunkt)
+    runtime_ns.memory = MemoryManager(t1_memory)
 
-    # 2) HMA sauber bauen (einmal!)
-    hma = build_hma(
-        runtime=runtime_ns,
-        llm_client=llm_client,
-        demo_registry=demo_registry,
-        config=DEFAULT_HMA_CONFIG,
+    # 2) HMA direkt hier konstruieren (reduziert Abhängigkeiten)
+    speaker = Speaker(runtime=runtime_ns)
+    runtime_ns.hma = HMA(
+        som_system_prompt=DEFAULT_HMA_CONFIG.som_system_prompt,
+        templates=DEFAULT_HMA_CONFIG,
+        demos=demo_registry,
+        messaging=runtime_ns.messaging,
+        llm=llm_client,
+        speaker=speaker,
+        ctx_provider=runtime_ns.t1_memory,
     )
-    runtime_ns.hma = hma
 
     # 3) Singleton zuweisen und zurückgeben
     _runtime_singleton = runtime_ns
