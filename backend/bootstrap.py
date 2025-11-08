@@ -9,7 +9,7 @@ from autogen_core.memory import MemoryContent, MemoryMimeType
 from .memory.memory import ZepMemory
 from .agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
 from .agent_core import messaging as _messaging
-from .memory.manager import MemoryManager
+from .memory.memory_wrapper import MemoryManager
 from .agent_core.hma.hma import HMA
 from .agent_core.hma.speaker import Speaker
 from contextvars import ContextVar
