@@ -1,17 +1,142 @@
-Offene Punkte (nur für root.md-Pflege)
+# 🧩 GatewayIDE Refactoring & Konsolidierung (Vor Agent-HQ-Integration)
 
-ARCHITECTURE.md an aktuellen Stand anpassen (SoM/HMA, Tabs, WS, Zep-Limit).
+---
 
-README.md als Einstieg (Quickstart, Build, Run, Tabs).
+## 🗎 Dokumentation & Strukturpflege
 
-backend/agent_core/konstruktor.py → constructor.py umbenennen + Referenzen prüfen.
+* **root.md** – Inhalts- und Zustandsübersicht aktualisieren.
+* **ARCHITECTURE.md** – an aktuellen technischen Stand anpassen (Module, Threads, Zep, HMA).
+* **README.md** – als Einstiegspunkt: *Quickstart, Build, Run, Tabs/Navigation*.
+* **services/GatewayAI/ai_service/** – Verschachtelung reduzieren (max. eine Ebene).
+* **GatewayIDE.App/ViewModels/MainWindowViewModel.cs** – modularisieren (z. B. Unterordner `Tabs/` mit eigenen ViewModels).
+* **/routes** – Einzeldateien ergänzen, sobald Endpoint-Liste feststeht.
 
-backend/zep_autogen/memory.py vs. backend/memory/memory.py kollision auflösen (Namens-/Verantwortungstrennung).
+---
 
-services/GatewayAI/ai_service/ Verschachtelung reduzieren (ein Ebenenlevel).
+## 🧠 1. Memory & Kontextverwaltung (Zep)
 
-GatewayIDE.App/ViewModels/MainWindowViewModel.cs modularisieren (z. B. Tabs/ mit separaten VMs).
+**Ziel:** Redundanzen beseitigen, zentrale Memory-Logik über Zep oder lokales Modul.
 
-/routes Einzeldateien ergänzen, sobald gelistet.
+**Subtasks:**
 
-docs/ mit neuer FileStrukture.md verlinken (nach Upload).
+* Entscheidung:
+
+  * Zep vollständig nutzen **oder** Fallback-Speicher entfernen.
+* Wenn **Zep aktiv:**
+
+  * API-Verwendung prüfen (`graph.search`, `thread.add_messages`, `memory.context`).
+  * Manuelle Kontextblöcke entfernen.
+  * Einheitliche Schnittstelle (`MemoryManager`) implementieren.
+* Wenn **Zep deaktiviert:**
+
+  * Lokales Memory kapseln.
+  * Alle Zep-Spezifika entfernen.
+
+---
+
+## 🤖 2. Agentenstruktur & Selektoren
+
+**Ziel:** Einheitliche Agenten-API, kein doppelter Code, klarer Dispatch.
+
+**Subtasks:**
+
+* Gemeinsames Interface: `Agent.respond(query)`.
+* Personal- und GPT-Agenten vereinheitlichen.
+* Einheitliches Antwortformat für Demos / Ich-Aggregation.
+* Aggregation (Ich) und Speaker klar trennen oder bewusst integrieren.
+* Selektoren abstrahieren (Mapping / Strategie-Pattern).
+* Zielwahl modularisieren (`dispatchTarget()`-Funktion).
+
+---
+
+## 📦 3. Backend-Aufbau & Modularität
+
+**Ziel:** Klare Verantwortlichkeiten, saubere Imports, Wiederverwendbarkeit.
+
+**Subtasks:**
+
+* Agenten-Logik in `agents/` auslagern.
+* Lebenszyklus zentralisieren (`init()`, `start()`, `reset()`).
+* Zustände kapseln (keine globalen Maps).
+* Memory-Handling in eigenem Modul (`memory/`).
+* Einheitliche Speicherstruktur (Queue, DB etc.).
+* Wiederholte Formatierungen vermeiden.
+* HMA-Kommunikation extrahieren: `HMAClient(init, send, fetch, retry)`.
+* Tokens / Endpoints zentral konfigurieren.
+* Zentrales Konfigurationssystem: `.env`, `config.json` oder `settings.yaml`.
+
+---
+
+## 🚀 4. Bootstrap & Startlogik
+
+**Ziel:** Klare Startsequenz, kein „toter“ Code.
+
+**Subtasks:**
+
+* `bootstrap()` in Phasen gliedern:
+
+  * `loadConfig()`, `connectHMA()`, `initAgents()`, `initMemory()`.
+* Async-Abläufe konsistent verketten (await / Promise / Event).
+* Alte Startcodes & Tests entfernen.
+* Startprozess dokumentieren (README oder Docstring).
+
+---
+
+## 💬 5. Chat-Routing & Nachrichtenfluss
+
+**Ziel:** Übersichtliche Struktur statt verschachtelter Bedingungen.
+
+**Subtasks:**
+
+* `ChatRouter` modularisieren (Handler pro Nachrichtentyp).
+* Dispatch-Table einsetzen: `handlers[message.type]()`.
+* Logging & Fehlerhandling zentralisieren (Middleware / Wrapper).
+* Kommunikation nur über Schnittstellen (keine Direktmanipulation am Memory).
+
+---
+
+## 📡 6. GRPC vs REST – Evaluationsphase
+
+**Ziel:** Technische Entscheidung vorbereiten, nicht voreilig treffen.
+
+**Subtasks:**
+
+* Entscheidungsmatrix: Vorteile / Nachteile in deinem Szenario.
+* Nur aktivieren bei geplanter Diensttrennung oder Streaming.
+* Optional: gRPC-Stub für internes Agentenprotokoll vorbereiten.
+
+---
+
+## 🧹 7. Cleanup & Vereinheitlichung
+
+**Ziel:** Lesbarkeit, Wartbarkeit, Zukunftssicherheit.
+
+**Subtasks:**
+
+* Alte Tests & Funktionen löschen.
+* Doppelte Logik zusammenführen (DRY-Prinzip).
+* Linting/Formatierung einführen: *black, isort, flake8, prettier.*
+* Basis-Unit-Tests: Agent / Memory / HMA-Kommunikation.
+
+---
+
+## ⚙️ Redundanz- und Konsolidierungsnotizen
+
+| Thema                                                   | Status                 | Nächster Schritt                                                                                                         |
+| :------------------------------------------------------ | :--------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| **Memory-Schicht (Fassade vs zep_autogen)**             | Teilweise gelöst       | `zep_autogen` als Kompatibilitäts-Layer markieren, intern auf `ZepMemory` durchreichen (Deprecation-Header, Re-exports). |
+| **Routing / Thread-Mapping**                            | Offen                  | Eine Quelle: Backend liefert Mapping via `/meta`-Endpoint oder Konstanten; UI liest nur.                                 |
+| **gRPC vs REST/WS**                                     | Offen                  | gRPC als Dev/Test-Double labeln; im Prod-Build deaktivieren.                                                             |
+| **Prozessausführung (DockerService vs ProcessManager)** | Offen                  | `ProcessManager` nur behalten, falls Non-Docker-Tools benötigt.                                                          |
+| **Kontextaufbau**                                       | Weitgehend geklärt     | Utility `context_builder.py` einführen; `zep_autogen` darauf umleiten.                                                   |
+| **Logging / Telemetry**                                 | Offen                  | Zentrales Korrelation-Schema (`corr_id`, `thread`, `role`, `route`) in `messaging`.                                      |
+| **Build-/Runtime-Pfad (CMD vs Compose)**                | Offen                  | Prod: Dockerfile-CMD = `backend.main:app`; Dev: Compose-Override dokumentieren.                                          |
+| **Konfiguration (.env vs Hardcode)**                    | Offen                  | Endpoints ausschließlich aus Settings/ENV lesen.                                                                         |
+| **Zep-Graph-Operationen**                               | Offen                  | `zep_autogen/graph` auf `ZepGraphAdmin` durchrouten.                                                                     |
+| **Thread-/User-IDs**                                    | Teilweise konsolidiert | „Single Source“ = Bootstrap; UI nur Anzeige.                                                                             |
+| **gRPC-Protobuf (Client + Server)**                     | Offen                  | Proto an einem Ort pflegen; Server → `tests/`.                                                                           |
+| **UI-Layoutsteuerung**                                  | Offen                  | Konstanten / Converter zentralisieren (`HalfConverter`).                                                                 |
+| **Dev-Container-Lifecycle**                             | Offen                  | Build-Script nur für Headless-Builds; UI steuert Laufzeit.                                                               |
+| **Heuristik / Findings**                                | Offen                  | Eine Entscheidungsstelle (HMA-Pfad).                                                                                     |
+| **uv.lock**                                             | Offen                  | Lock neu erzeugen, Plattform-Einträge prüfen.                                                                            |
+

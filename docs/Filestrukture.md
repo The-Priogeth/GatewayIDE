@@ -2,62 +2,84 @@
 
 Gateway/
 ├── README.md
-├── LICENSE
-├── CHANGELOG
 ├── .dockerignore
 ├── .gitignore
 ├── .env
-├── demo.env
-├── docker-compose.yml
-├── Dockerfile
-├── run.py # runs docker, builds image, starts container, opens cmd,starts app
+├── demoenv
 ├── pyproject.toml
+├── ARCHITECTURE.dm
+├── build-win.bat
+├── uv.lock
 ├── .git/
 ├── .venv/
-├── .vscode/
+├── .vs/
 ├── backend/
 │   ├── __init__.py
 │   ├── main.py
 │   ├── bootstrap.py
-│   ├── agent.py -> muss noch angepassst werden und in agent_core verschoben werden
-│   ├── tools.py -> wird ersetzt sehe captainagent tools
 │   ├── memory/
 │   │   ├── __init__.py
 │   │   ├── memory.py
-│   │   ├── memory_zep_graph.py
-│   │   ├── memory_zep_thread.py
+│   │   ├── memory_wrapper.py
+│   │   └── memory_tools.py
 │   ├── ag2/
-│   ├── zep_autogen/
 │   ├── agent_core/
 │   │   ├── __init__.py
-│   │   ├── core.py
+│   │   ├── messaging.py
 │   │   ├── managers/
-│   │   ├── agents/
-│   ├── history/
-│       ├── __init__.py
-│   │   ├── chats/
+│   │   │   ├── __init__.py
+│   │   │   ├── librarian.py
+│   │   │   ├── taskmanager.py
+│   │   │   └── trainer.py
+│   │   ├── # agents/
+│   │   └── hma/
+│   │       ├── __init__
+│   │       ├── hma_config.py
+│   │       ├── hma.py
+│   │       ├── routing.py
+│   │       ├── selector.py
+│   │       └── speaker.py
 │   └── routes/
 │       ├── __init__.py
 │       ├── chat_api.py
-│       ├── memory_api.py
+│       ├── # memory_api.py
 │       ├── agents.py
-│       ├── status_api.py
-│       ├── library_api.py
-│       ├── agents.py
-│       ├── settings.py
-│       ├── # system.py
-│       └── ws_utils.py
-├── config/
-│   ├── admin.json
-│   ├── default.json
-│   ├── llm_config.json
-│   ├── manager.json
-│   ├── lobby_init.json
-│   └── user.json
+│       ├── # status_api.py
+│       ├── # library_api.py
+│       ├── # settings.py
+│       └── websocket.py
 ├── docs/
 ├── logs/
 │   ├── watchdog
-│   ├── server
+│   └── server
 ├── builds/
 │   ├── client/
 │   └── server/
+├── deploy/
+│   ├── scripts/
+│   │   └── Dockerfile.ai
+│   └── gateway-compose.yaml
+├── protos/
+│   └── ai_service.proto
+├── services/
+│   └── GatewayAI/
+│       └── ai_service/
+│           ├── __init__
+│           ├── requirements.txt
+│           └── server.py
+└── GatewayIDE.App/
+    ├── Services/
+    │   ├── AI/
+    │   │   └── AIClientService C#
+    │   └── Processes/
+    │       └── DockerService C#
+    ├── ViewModels/
+    │   ├── DelegateCommand C#
+    │   └──  MainWindowViewModel C#
+    ├── App.axaml
+    ├── App.axaml C#
+    ├── Converters C#
+    ├── GatewayIDE.App C#
+    ├── MainWindow.axaml
+    ├── MainWindow.axaml C#
+    └── Program C#

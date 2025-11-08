@@ -1,14 +1,6 @@
-"""
-Zep Memory integration for AutoGen.
-Facade that composes ZepThreadMemory + ZepGraphAdmin to keep a clean structure,
-while preserving the public API expected by AutoGen:
-  - add(), add_episode(), query(), update_context(), clear(), close()
-"""
 from __future__ import annotations
 
-import logging
-from typing import Any, Optional
-
+from typing import Any, Optional, List, Dict, Literal, Set
 from autogen_core import CancellationToken
 from autogen_core.memory import (
     Memory,
@@ -19,11 +11,362 @@ from autogen_core.memory import (
 )
 from autogen_core.model_context import ChatCompletionContext
 from autogen_core.models import SystemMessage
+
 from zep_cloud.client import AsyncZep
+from zep_cloud.core.api_error import ApiError
+# from zep_cloud.graph import (
+#     SearchResult,
+#     AddDocumentRequest,
+#     AddNodeRequest,
+#     AddEdgeRequest,
+# )
+# from zep_cloud.thread import Message, Role
+from datetime import datetime
+import logging
+logger = logging.getLogger(__name__)
 
-from backend.memory.memory_zep_thread import ZepThreadMemory
-from backend.memory.memory_zep_graph import ZepGraphAdmin
 
+# -------------------------------
+# Embedded: ZepThreadMemory
+# -------------------------------
+class ZepThreadMemory:
+    def __init__(
+        self,
+        client: AsyncZep,
+        user_id: str,
+        thread_id: Optional[str] = None,
+        *,
+        default_context_mode: Literal["basic", "summary"] = "basic",
+    ) -> None:
+        self._client: Any = client
+        self._user_id = user_id
+        self._thread_id = thread_id
+        self._default_context_mode = default_context_mode
+
+    # -------------------------
+    # Properties / accessors
+    # -------------------------
+
+    @property
+    def thread_id(self) -> Optional[str]:
+        return self._thread_id
+
+    def set_thread(self, thread_id: Optional[str]) -> None:
+        self._thread_id = thread_id
+
+    @property
+    def _is_local(self) -> bool:
+        tid = self._thread_id or ""
+        return str(tid).startswith("local_")
+
+    # -------------------------
+    # Core helpers
+    # -------------------------
+    async def ensure_thread(self, force_check: bool = False) -> str:
+        if not self._thread_id:
+            t = await self._client.thread.create(user_id=self._user_id)  # type: ignore[call-arg]
+            tid = getattr(t, "thread_id", None) or getattr(t, "uuid", None) or getattr(t, "id", None)
+            if not tid:
+                raise RuntimeError("ZEP thread.create returned no id")
+            self._thread_id = str(tid)
+            return self._thread_id
+
+        if force_check:
+            try:
+                await self._client.thread.get(thread_id=self._thread_id)
+            except ApiError as e:
+                if getattr(e, "status_code", None) == 404:
+                    t = await self._client.thread.create(user_id=self._user_id, thread_id=self._thread_id)
+                    tid = getattr(t, "thread_id", None) or getattr(t, "uuid", None) or getattr(t, "id", None)
+                    self._thread_id = str(tid) if tid else self._thread_id
+                else:
+                    raise
+        return self._thread_id
+    
+
+    # -------------------------
+    # Message writers
+    # -------------------------
+
+    async def add_user_message(self, content: str, *, name: Optional[str] = None) -> None:
+        await self._add_message("user", content, name)
+
+    async def add_assistant_message(self, content: str, *, name: Optional[str] = None) -> None:
+        await self._add_message("assistant", content, name)
+
+    async def add_system_message(self, content: str, *, name: Optional[str] = None) -> None:
+        await self._add_message("system", content, name)
+
+    async def _add_message(self, role: str, content: str, name: str | None = None) -> None:
+        thread_id = await self.ensure_thread(force_check=True)
+        msg: dict[str, Any] = {"role": role, "content": content}
+        if name:
+            msg["name"] = name
+
+        try:
+            await self._client.thread.add_messages(thread_id=thread_id, messages=[msg])  # type: ignore[arg-type]
+            return
+        except ApiError as e:
+            if getattr(e, "status_code", None) == 404:
+                # einmal explizit anlegen & retry
+                t = await self._client.thread.create(user_id=self._user_id, thread_id=thread_id)
+                tid = getattr(t, "thread_id", None) or getattr(t, "uuid", None) or getattr(t, "id", None) or thread_id
+                self._thread_id = str(tid)
+                await self._client.thread.add_messages(thread_id=self._thread_id, messages=[msg])
+                return
+            raise
+
+    # -------------------------
+    # Readers / helpers
+    # -------------------------
+
+    async def list_recent_messages(self, limit: int = 10) -> List[Dict[str, Any]]:
+        if not self._thread_id or self._is_local:
+            return []
+        try:
+            resp = await self._client.thread.get(thread_id=self._thread_id)
+            raw = getattr(resp, "messages", None) or []
+            out: List[Dict[str, Any]] = []
+            for m in raw[-limit:]:
+                if isinstance(m, dict):
+                    role = m.get("role") or ""
+                    content = m.get("content") or ""
+                    ts = m.get("created_at") or m.get("ts")
+                else:
+                    role = getattr(m, "role", "") or getattr(m, "type", "")
+                    content = getattr(m, "content", "") or getattr(m, "text", "")
+                    ts = getattr(m, "created_at", None)
+                if not content:
+                    continue
+                out.append({"role": str(role), "content": str(content), "ts": ts})
+            return out
+        except Exception:
+            return []
+
+    async def search_text(
+        self,
+        query: str,
+        *,
+        limit: int = 5,
+        roles: Optional[List[str]] = None,
+        exclude_notes: bool = False,
+        dedupe: bool = True,
+        max_scan: int = 200,
+    ) -> List[Dict[str, Any]]:
+        """
+        Einfache Thread-Volltextsucht:
+        - Holt die letzten `max_scan` Nachrichten des Threads
+        - Filtert NEUESTE → ÄLTERE nach `query`
+        - Optional: Rollenfilter, „Merke:“ ausblenden, Dedupe
+        Rückgabe: [{"role","content","ts"}, ...]
+        """
+        if not self._thread_id or self._is_local:
+           return []
+        qcf = (query or "").strip().casefold()
+        try:
+            resp = await self._client.thread.get(thread_id=self._thread_id)
+            raw = getattr(resp, "messages", None) or []
+        except Exception:
+            raw = []
+
+        msgs = raw[-max_scan:] if max_scan else raw
+        want_roles: Optional[Set[str]] = {r.lower() for r in roles} if roles else None
+        results: List[Dict[str, Any]] = []
+        seen: Set[str] = set()
+
+        for m in reversed(msgs):  # neueste → ältere
+            if isinstance(m, dict):
+                role = str(m.get("role") or "")
+                text = str(m.get("content") or "")
+                ts = m.get("created_at") or m.get("ts")
+            else:
+                role = str(getattr(m, "role", "") or getattr(m, "type", ""))
+                text = str(getattr(m, "content", "") or getattr(m, "text", ""))
+                ts = getattr(m, "created_at", None)
+            if not text:
+                continue
+            if want_roles and role.lower() not in want_roles:
+                continue
+            if exclude_notes and text.strip().lower().startswith("merke:"):
+                continue
+            if qcf and qcf not in text.casefold():
+                continue
+            key = text.strip().casefold()
+            if dedupe and key in seen:
+                continue
+            seen.add(key)
+            results.append({"role": role or "user", "content": text, "ts": ts})
+            if len(results) >= limit:
+                break
+        return results
+
+    async def get_user_context(self, mode: Optional[str] = None) -> str:
+        if not self._thread_id or self._is_local:
+            return ""
+        try:
+            ctx = await self._client.thread.get_user_context(
+                thread_id=self._thread_id, mode=mode or self._default_context_mode
+            )
+            return str(getattr(ctx, "context", "") or "")
+        except Exception:
+            return ""
+
+    async def build_context_block(self, *, include_recent: bool = True, recent_limit: int = 10) -> str:
+        parts: List[str] = []
+        ctx = await self.get_user_context()
+        if ctx:
+            parts.append(f"Memory context: {ctx}")
+        if include_recent:
+            recent = await self.list_recent_messages(limit=recent_limit)
+            if recent:
+                lines: List[str] = []
+                for m in recent:
+                    role = (m.get("role") or "").strip() if isinstance(m, dict) else ""
+                    content = (m.get("content") or "").strip() if isinstance(m, dict) else ""
+                    if not content:
+                        continue
+                    content = str(content).strip()
+                    if len(content) > 2000:
+                        content = content[:2000] + " …"
+                    lines.append(f"{role}: {content}")
+                if lines:
+                    parts.append("Recent conversation:\n" + "\n".join(lines))
+        return "\n\n".join(parts)
+
+
+
+# -------------------------------
+# Embedded: ZepGraphAdmin
+# -------------------------------
+class ZepGraphAdmin:
+    def __init__(
+        self,
+        client: AsyncZep,
+        *,
+        user_id: Optional[str] = None,
+        graph_id: Optional[str] = None,
+    ) -> None:
+        self._client: Any = client
+        self._user_id = user_id
+        self._graph_id = graph_id
+
+    # Internal helper
+    def _gid(self, graph_id: Optional[str]) -> str:
+        gid = graph_id or self._graph_id
+        if not gid:
+            raise ValueError("graph_id required")
+        return gid
+    
+    # Target selection
+    def set_user(self, user_id: str) -> None:
+        self._user_id = user_id
+
+    def set_graph(self, graph_id: str) -> None:
+        self._graph_id = graph_id
+
+    def target_kwargs(self) -> Dict[str, Any]:
+        if self._graph_id:
+            return {"graph_id": self._graph_id}
+        if self._user_id:
+            return {"user_id": self._user_id}
+        raise ValueError("Neither graph_id nor user_id is set for ZepGraphAdmin")
+
+    # Provisioning
+    async def create_graph(self, graph_id: str) -> Any:
+        return await self._client.graph.create(graph_id=graph_id)
+
+    async def list_graphs(self) -> List[Any]:
+        return await self._client.graph.list()
+
+    async def update_graph(self, graph_id: str, **kwargs: Any) -> Any:
+        return await self._client.graph.update(graph_id=graph_id, **kwargs)
+
+    async def clone_graph(self, src_graph_id: str, new_label: str) -> Any:
+        return await self._client.graph.clone(graph_id=src_graph_id, new_label=new_label)
+
+    async def set_ontology(self, graph_id: Optional[str], schema: Dict[str, Any]) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.set_ontology(graph_id=gid, schema=schema)
+
+    async def add_node(self, name: str, *, summary: Optional[str] = None,
+                       attributes: Optional[Dict[str, Any]] = None,
+                       graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.add_node(graph_id=gid, name=name,
+                                                 summary=summary, attributes=attributes or {})
+
+    async def add_fact_triple(self, head_uuid: str, relation: str, tail_uuid: str, *,
+                              attributes: Optional[Dict[str, Any]] = None,
+                              rating: Optional[float] = None,
+                              graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.add_edge(
+            graph_id=gid, head_uuid=head_uuid, relation=relation, tail_uuid=tail_uuid,
+            attributes=attributes or {}, rating=rating
+        )
+
+    async def get_node(self, node_uuid: str, *, graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.get_node(graph_id=gid, node_uuid=node_uuid)
+
+    async def get_edge(self, edge_uuid: str, *, graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.get_edge(graph_id=gid, edge_uuid=edge_uuid)
+
+    async def get_node_edges(self, node_uuid: str, *, graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.get_node_edges(graph_id=gid, node_uuid=node_uuid)
+
+    async def delete_edge(self, edge_uuid: str, *, graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.delete_edge(graph_id=gid, edge_uuid=edge_uuid)
+
+    async def delete_episode(self, episode_uuid: str, *, graph_id: Optional[str] = None) -> Any:
+        gid = self._gid(graph_id)
+        return await self._client.graph.delete_episode(graph_id=gid, episode_uuid=episode_uuid)
+
+    async def add_raw_data(self, *, user_id: Optional[str], data_type: str, data: str) -> Any:
+        """
+        Schreibt bevorzugt in den explizit gesetzten Graph (graph_id).
+        Fällt zurück auf den User-Graph, wenn kein graph_id konfiguriert ist.
+        """
+        if getattr(self, "_graph_id", None):
+            return await self._client.graph.add(graph_id=self._graph_id, type=data_type, data=data)
+        # Fallback: User-Graph
+        uid = user_id or self._user_id
+        if not uid:
+            raise ValueError("user_id required for add_raw_data when no graph_id is set")
+        return await self._client.graph.add(user_id=uid, type=data_type, data=data)
+ 
+
+    # Unified Search
+    async def search(
+        self,
+        query: str,
+        *,
+        limit: int = 10,
+        scope: Optional[str] = None,
+        search_filters: Optional[Dict[str, Any]] = None,
+        min_fact_rating: Optional[float] = None,
+        reranker: Optional[str] = None,
+        center_node_uuid: Optional[str] = None,
+        **kwargs: Any,
+    ) -> Any:
+        target = self.target_kwargs()
+        params: Dict[str, Any] = {**target, "query": query, "limit": limit}
+        if scope is not None: params["scope"] = scope
+        if search_filters is not None: params["search_filters"] = search_filters
+        if min_fact_rating is not None: params["min_fact_rating"] = min_fact_rating
+        if reranker is not None: params["reranker"] = reranker
+        if center_node_uuid is not None: params["center_node_uuid"] = center_node_uuid
+        params.update(kwargs)
+        return await self._client.graph.search(**params)
+
+
+
+# -------------------------------
+# Hauptklasse: ZepMemory
+# -------------------------------
 class ZepMemory(Memory):
     def __init__(
         self,
@@ -40,18 +383,32 @@ class ZepMemory(Memory):
         self._user_id: str = user_id
         self._config = kwargs
         self._logger = logging.getLogger(__name__)
-        # Teil-Fassaden (nur hier verwalten wir die thread_id):
+        # Thread-Fassade (thread_id wird nur hier verwaltet):
         self._thread = ZepThreadMemory(self._client, self._user_id, thread_id=thread_id)
-        self._graph = ZepGraphAdmin(self._client, user_id=self._user_id)
 
-    # Properties, damit diag/health etwas sehen:
+    # --- zentraler, zustandsloser Graph-Helper ---
+    def _get_graph(self) -> ZepGraphAdmin:
+        """
+        Liefert stets einen korrekt gebundenen ZepGraphAdmin:
+        - bevorzugt graph_id (falls per adopt_graph_id gesetzt)
+        - sonst user_id
+        Hinweis: ZepGraphAdmin ist leichtgewichtig → wir instanzieren on-demand.
+        """
+        target_graph_id = getattr(self, "_graph_id", None)
+        if target_graph_id:
+            return ZepGraphAdmin(self._client, graph_id=target_graph_id)
+        return ZepGraphAdmin(self._client, user_id=self._user_id)
+
     @property
-    def thread_id(self) -> str | None:
-        return getattr(self._thread, "thread_id", None)
+    def thread_id(self) -> Optional[str]:
+        return self._thread.thread_id
     
     @property
     def user_id(self) -> str | None:
         return self._user_id
+
+    def set_thread(self, thread_id: Optional[str]) -> None:
+        self._thread.set_thread(thread_id)
 
     def adopt_thread_id(self, thread_id: str) -> None:
         if getattr(self, "_thread", None) is not None:
@@ -68,10 +425,11 @@ class ZepMemory(Memory):
             self._thread.set_thread(local_tid)
         setattr(self, "_thread_id", local_tid)
         return local_tid
-
+    
     async def add(
         self, content: MemoryContent, cancellation_token: CancellationToken | None = None, *args, **kwargs
     ) -> None:
+        _ = cancellation_token; _ = args; _ = kwargs  # silence unused
         supported = {MemoryMimeType.TEXT, MemoryMimeType.MARKDOWN, MemoryMimeType.JSON}
         if content.mime_type not in supported:
             raise ValueError(
@@ -86,6 +444,7 @@ class ZepMemory(Memory):
         if content_type == "message":
             role = meta.get("role", "user")
             name = meta.get("name")
+            also_graph = bool(meta.get("also_graph", False))
             text = str(content.content)
             if role == "assistant":
                 await self._thread.add_assistant_message(text, name=name)
@@ -93,10 +452,19 @@ class ZepMemory(Memory):
                 await self._thread.add_system_message(text, name=name)
             else:
                 await self._thread.add_user_message(text, name=name)
+            # Optionales Duplikat im Graph beibehalten (ersetzt früheres add_message(also_graph=True))
+            if also_graph and not self._thread._is_local:
+                try:
+                    # Ziel-Admin passend binden (graph_id bevorzugt, sonst user_id)
+                    target_graph_id = getattr(self, "_graph_id", None)
+                    ga = ZepGraphAdmin(self._client, graph_id=target_graph_id, user_id=None if target_graph_id else self._user_id)
+                    await ga.add_raw_data(user_id=None, data_type="text", data=str(text))
+                except Exception as e:
+                    self._logger.debug(f"graph-add skipped: {e}")
             return
 
         # wenn local_* → kein Zep-Graph-Write
-        if self._thread.is_local:
+        if self._thread._is_local:
             return None
 
         # Route strukturierte/plain Daten → User-Graph
@@ -107,14 +475,14 @@ class ZepMemory(Memory):
                 MemoryMimeType.JSON: "json",
             }
             data_type = mime_to_type.get(content.mime_type, "text")
-            await self._graph.add_raw_data(user_id=self._user_id, data_type=data_type, data=str(content.content))
+            await self._get_graph().add_raw_data(user_id=self._user_id, data_type=data_type, data=str(content.content))
             return
 
         raise ValueError(f"Unsupported metadata type: {content_type}. Supported: 'message', 'data'")
 
+
     async def add_episode(self, content: str, source: str = "agent", role: str | None = None, **attributes: Any) -> None:
         """Compat sugar: persist a structured 'episode' into the user's graph."""
-        from datetime import datetime
         payload = {
             "kind": "episode",
             "content": content,
@@ -131,12 +499,77 @@ class ZepMemory(Memory):
             )
         )
 
+
+    async def search(
+        self,
+        query: str,
+        *,
+        k: int = 10,
+        tags: Optional[list[str]] = None,
+    ) -> list[MemoryContent]:
+        _ = tags  # reserved for future use; avoids unused-variable warning
+
+        try:
+            results = await self._get_graph().search(query=query, limit=k)
+        except Exception as e:
+            self._logger.warning(f"graph.search failed: {e}")
+            return []
+
+        out: list[MemoryContent] = []
+
+        for r in results:
+            # created_at robust wandeln
+            created_raw = getattr(r, "created_at", None)
+            if created_raw is None:
+                created_val = None
+            else:
+                iso_fn = getattr(created_raw, "isoformat", None)
+                if callable(iso_fn):
+                    created_val = iso_fn()
+                else:
+                    created_val = str(created_raw)
+
+
+            out.append(
+                MemoryContent(
+                    content=getattr(r, "content", "") or "",
+                    mime_type=MemoryMimeType.TEXT,
+                    metadata={
+                        "source": "graph",
+                        "uuid": getattr(r, "uuid", None),
+                        "type": getattr(r, "type", None),
+                        "created_at": created_val,
+                        "score": getattr(r, "score", None),
+                    },
+                )
+            )
+
+        return out
+
+
+
+    async def clear(self) -> None:
+        try:
+            if self._thread.thread_id:
+                await self._client.thread.delete(thread_id=self._thread.thread_id)
+        except Exception as e:
+            self._logger.error(f"Error clearing Zep memory: {e}")
+            raise
+
+    async def close(self) -> None:
+        # client lifecycle is managed by caller
+        pass
+
+
+
+
     async def query(
         self,
         query: str | MemoryContent,
         cancellation_token: CancellationToken | None = None,
         **kwargs: Any,
     ) -> MemoryQueryResult:
+        _ = cancellation_token
         if isinstance(query, MemoryContent):
             q = str(query.content)
         else:
@@ -162,20 +595,7 @@ class ZepMemory(Memory):
         results: list[MemoryContent] = []
 
         try:
-            # Nur gültige Keys setzen → kein falscher Typ in die Signatur
-            search_args: dict[str, Any] = {"query": q, "limit": limit}
-            if scope is not None:
-                search_args["scope"] = scope
-            if search_filters is not None:
-                search_args["search_filters"] = search_filters
-            if min_fact_rating is not None:
-                search_args["min_fact_rating"] = min_fact_rating
-            if reranker is not None:
-                search_args["reranker"] = reranker
-            if center_node_uuid is not None:
-                search_args["center_node_uuid"] = center_node_uuid
-
-            graph_results = await self._graph.search(
+            graph_results = await self._get_graph().search(
                 query=q,
                 limit=limit,
                 scope=scope,
@@ -239,8 +659,6 @@ class ZepMemory(Memory):
         return MemoryQueryResult(results=results)
 
 
-
-
     async def update_context(self, model_context: ChatCompletionContext) -> UpdateContextResult:
         try:
             # Ohne Zugriff auf model_context.get_messages() – vermeidet .get()-Fehler
@@ -268,24 +686,6 @@ class ZepMemory(Memory):
             self._logger.error(f"Error updating context with Zep memory: {e}")
             return UpdateContextResult(memories=MemoryQueryResult(results=[]))
 
-    async def clear(self) -> None:
-        try:
-            if self._thread.thread_id:
-                await self._client.thread.delete(thread_id=self._thread.thread_id)
-        except Exception as e:
-            self._logger.error(f"Error clearing Zep memory: {e}")
-            raise
-
-    async def close(self) -> None:
-        # client lifecycle is managed by caller
-        pass
-
-
-# --- NEU in class ZepMemory ---------------------------------
-
-    def adopt_graph_id(self, graph_id: str) -> None:
-        """Setzt den Ziel-Graph für Reads/Writes. Entfernen per None."""
-        self._graph_id = str(graph_id).strip() if graph_id else None
 
     async def get_context(
         self,
@@ -309,19 +709,15 @@ class ZepMemory(Memory):
             self._logger.debug(f"thread-context skipped: {e}")
 
         # Optional: Graph-Snippet
-        if graph and getattr(self, "_graph", None):
+        # Hinweis: Bei lokalen Threads (local_*) niemals Graph-Kontext ziehen.
+        #          Das verhindert inkonsistente Zustände im Offline-/Fallback-Modus.
+        if graph and not self._thread._is_local:
             try:
                 params: dict[str, Any] = {"limit": 5}
                 if graph_filters:
                     params.update(graph_filters)
 
-                target_graph_id = getattr(self, "_graph_id", None)
-                if target_graph_id:
-                    ga = ZepGraphAdmin(self._client, graph_id=target_graph_id)
-                else:
-                    ga = ZepGraphAdmin(self._client, user_id=self._user_id)
-
-                res = await ga.search(query="*", **params)
+                res = await self._get_graph().search(query="*", **params)
 
                 lines: list[str] = []
                 for e in (getattr(res, "edges", []) or [])[:5]:
@@ -339,48 +735,6 @@ class ZepMemory(Memory):
         ctx = "\n\n".join([p for p in parts if p and p.strip()]) or ""
         return ctx
 
-    async def add_message(
-        self,
-        role: str,
-        text: str,
-        name: str | None = None,
-        *,
-        also_graph: bool = False,
-    ) -> None:
-        """Einheitlicher Schreibpfad für Speaker/Demos (Thread-first, optional Graph-Duplikat)."""
-        r = (role or "user").lower().strip()
-        if r == "assistant":
-            await self._thread.add_assistant_message(text, name=name)
-        elif r == "system":
-            await self._thread.add_system_message(text, name=name)
-        else:
-            await self._thread.add_user_message(text, name=name)
-
-        # Optionales Duplikat in Graph (bewusst „später“ nutzbar)
-        if also_graph and not self._thread.is_local:
-            try:
-                # Ziel-Admin passend binden (graph_id bevorzugt, sonst user_id)
-                target_graph_id = getattr(self, "_graph_id", None)
-                if target_graph_id:
-                    ga = ZepGraphAdmin(self._client, graph_id=target_graph_id)
-                else:
-                    ga = ZepGraphAdmin(self._client, user_id=self._user_id)
-
-                await ga.add_raw_data(
-                    user_id=self._user_id,
-                    data_type="text",
-                    data=str(text),
-                )
-            except Exception as e:
-                self._logger.debug(f"graph-add skipped: {e}")
-
-# Convenience re-exports (optional)
-try:
-    from backend.memory.memory_tools import (
-        search_memory,
-        add_graph_data,
-        create_search_graph_tool,
-        create_add_graph_data_tool,
-    )
-except Exception:
-    pass
+    def adopt_graph_id(self, graph_id: Optional[str]) -> None:
+        """Setzt den Ziel-Graph für Reads/Writes. Entfernen per None/''."""
+        self._graph_id = (str(graph_id).strip() or None) if graph_id is not None else None

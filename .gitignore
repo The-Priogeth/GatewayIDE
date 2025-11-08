@@ -73,7 +73,7 @@ GatewayIDE-crash.log
 /backend/logs/
 /logs/
 /pbuffer/
-/docs/legacy/
+/backend/legacy/
 **/deploy/**/logs/
 *.axaml.cs.*.cache
 test_data
