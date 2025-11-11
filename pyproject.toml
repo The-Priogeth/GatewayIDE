@@ -1,19 +1,21 @@
 [project]
 name = "GatewayIDE"
-version = "2.1.4"
+version = "3.1.4"
 description = "Gatweway with Zep integration for Autogen [AG2]"
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 
     dependencies = [
+        # Web stack
         "fastapi==0.118.0",                   # latest FastAPI release (Sep 28 2025)
         "uvicorn>=0.37.0",                    # pin minimum Uvicorn version (Sep 23 2025)
         "watchfiles>=1.1.0",                  # modern file watcher (replaces watchdog)
+
+        # Data & utils
         "pydantic==2.11.10",                  # latest Pydantic (Oct 4 2025)
         "typing-extensions>=4.15.0",          # update to latest typing extensions (Aug 25 2025)
         "loguru==0.7.3",                      # bump Loguru (Dec 6 2024)
-        "aiohttp>=3.12.15",                   # keep: used by downstream clients
         "python-dotenv>=1.1.1",               # latest python‑dotenv (Jun 23 2025)
         "rich>=14.1.0",                       # update Rich (Jul 25 2025)
 
@@ -22,18 +24,14 @@ requires-python = ">=3.10"
 
         "ag2[openai]>=0.9.10",                # latest AG2 release (Oct 3 2025)
         "httpx>=0.28.1",                      # latest HTTPX (Dec 6 2024)
-        # "ag2[gemini]",                      # optional extras: leave commented
-        # "ag2[anthropic,cohere,mistral]",    # optional extras: leave commented
-        # "ag2[ollama]>=0.9",                 # optional extras: leave commented
-        # "ollama>=0.4.8",                    # optional extras: leave commented
-        # "streamlit>=1.44.1",                # unused in backend – comment out
+        # "streamlit>=1.44.1",                # unused in backend – comment out (Deepnote?)
 
-        "autogen-agentchat>=0.7.5",           # update AgentChat (Sep 29 2025)
-        "autogen-ext[azure,openai]>=0.7.5",   # update AutoGen extensions (Sep 29 2025)
+        #"autogen-agentchat>=0.7.5",           # update AgentChat (Sep 29 2025)
+        #"autogen-ext[openai]>=0.7.5",         # update AutoGen extensions (Sep 29 2025)
         "autogen-core>=0.7.5",                # update AutoGen core (Sep 29 2025)
         "zep-cloud>=3.5.0",                   # update Zep cloud SDK (Oct 3 2025)
         "zep-autogen>=1.1.0",                 # update Zep AutoGen integration (Aug 11 2025)
-        "zep-python>=2.0.2",                  # update community Zep SDK (Sep 26 2024)
+
     ]
 
 

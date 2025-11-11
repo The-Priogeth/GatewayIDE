@@ -1,122 +1,172 @@
 # backend/memory/memory_tools.py
-"""
-Zep AutoGen Tools (offizielle Location).
-Tools zum Suchen/Schreiben im Zep-Graph/User-Graph. 
-Ehemals backend.zep_autogen.tools – jetzt konsolidiert unter backend.memory.
-"""
 from __future__ import annotations
-import logging
-from typing import Annotated, Any
+
+from typing import Annotated, Any, Dict, List, Literal, Callable
 from autogen_core.tools import FunctionTool
-from zep_cloud.client import AsyncZep
+from .graph_api import GraphAPI
 
-logger = logging.getLogger(__name__)
+GetAPI = Callable[[], GraphAPI]
 
-async def search_memory(
-    client: AsyncZep,
-    query: Annotated[str, "The search query to find relevant memories"],
-    graph_id: Annotated[str | None, "Graph ID to search in (for generic knowledge graph)"] = None,
-    user_id: Annotated[str | None, "User ID to search graph for (for user knowledge graph)"] = None,
-    limit: Annotated[int, "Maximum number of results to return"] = 10,
-    scope: Annotated[
-        str | None,
-        "Scope of search: 'edges' (facts), 'nodes' (entities), 'episodes' (for knowledge graph). Defaults to edges",
-    ] = "edges",
-) -> list[dict[str, Any]]:
-    if not graph_id and not user_id:
-        raise ValueError("Either graph_id or user_id must be provided")
-    if graph_id and user_id:
-        raise ValueError("Only one of graph_id or user_id should be provided")
-    try:
-        results = []
-        if graph_id:
-            search_results = await client.graph.search(graph_id=graph_id, query=query, limit=limit, scope=scope)
-        else:
-            search_results = await client.graph.search(user_id=user_id, query=query, limit=limit)
-        if getattr(search_results, "edges", None):
-            for edge in (getattr(search_results, "edges", []) or []):
-                results.append({
-                    "content": edge.fact,
-                    "type": "edge",
-                    "name": edge.name,
-                    "attributes": edge.attributes or {},
-                    "created_at": edge.created_at,
-                    "valid_at": edge.valid_at,
-                    "invalid_at": edge.invalid_at,
-                    "expired_at": edge.expired_at,
-                })
-        if getattr(search_results, "nodes", None):
-            for node in (getattr(search_results, "nodes", []) or []):
-                results.append({
-                    "content": f"{node.name}: {node.summary}",
-                    "type": "node",
-                    "name": node.name,
-                    "attributes": node.attributes or {},
-                    "created_at": node.created_at,
-                })
-        if getattr(search_results, "episodes", None):
-            for episode in (getattr(search_results, "episodes", []) or []):
-                results.append({
-                    "content": episode.content,
-                    "type": "episode",
-                    "source": episode.source,
-                    "role": episode.role,
-                    "created_at": episode.created_at,
-                })
-        logger.info(f"Found {len(results)} memories for query: {query}")
-        return results
-    except Exception as e:
-        logger.error(f"Error searching memory: {e}")
-        return []
+def create_clone_user_graph_tool(get_api: GetAPI) -> FunctionTool:
+    async def clone_user_graph(
+        source_user_id: Annotated[str, "Source user ID"],
+        target_user_id: Annotated[str, "Target user ID"],
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.clone_user_graph(source_user_id=source_user_id, target_user_id=target_user_id)
+    return FunctionTool(
+        func=clone_user_graph,
+        name="clone_user_graph",
+        description="Clone a complete user graph from source_user_id to target_user_id.",)
 
-async def add_graph_data(
-    client: AsyncZep,
-    data: Annotated[str, "The data/information to store in the graph"],
-    graph_id: Annotated[str | None, "Graph ID to store data in (for graph memory)"] = None,
-    user_id: Annotated[str | None, "User ID to store data for (for user memory)"] = None,
-    data_type: Annotated[str, "Type of data: 'text', 'json', or 'message'"] = "text",
-) -> dict[str, Any]:
-    if not graph_id and not user_id:
-        raise ValueError("Either graph_id or user_id must be provided")
-    if graph_id and user_id:
-        raise ValueError("Only one of graph_id or user_id should be provided")
-    try:
-        if graph_id:
-            await client.graph.add(graph_id=graph_id, type=data_type, data=data)
-            logger.debug(f"Added data to graph {graph_id}")
-            return {"success": True, "message": "Data added to graph memory", "graph_id": graph_id, "data_type": data_type}
-        else:
-            await client.graph.add(user_id=user_id, type=data_type, data=data)
-            logger.debug(f"Added data to user graph {user_id}")
-            return {"success": True, "message": "Data added to user graph memory", "user_id": user_id, "data_type": data_type}
-    except Exception as e:
-        logger.error(f"Error adding memory data: {e}")
-        return {"success": False, "message": f"Failed to add data: {str(e)}"}
+def create_set_ontology_tool(get_api: GetAPI) -> FunctionTool:
+    async def bound_set_ontology(
+        schema: Annotated[Dict[str, Any], "Ontology schema dict (entity_types, edge_types, etc.)"],
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.set_ontology(schema)
+    return FunctionTool(bound_set_ontology, name="set_ontology", description="Set ontology for the current graph scope.")
 
-def create_search_graph_tool(client: AsyncZep, graph_id: str | None = None, user_id: str | None = None) -> FunctionTool:
-    if not graph_id and not user_id:
-        raise ValueError("Either graph_id or user_id must be provided when creating the tool")
-    if graph_id and user_id:
-        raise ValueError("Only one of graph_id or user_id should be provided when creating the tool")
-    async def bound_search_memory(
-        query: Annotated[str, "The search query to find relevant memories"],
-        limit: Annotated[int, "Maximum number of results to return"] = 10,
-        scope: Annotated[
-            str | None,
-            "Scope of search: 'edges' (facts), 'nodes' (entities), 'episodes' (for knowledge graph). Defaults to edges",
-        ] = "edges",
-    ) -> list[dict[str, Any]]:
-        return await search_memory(client, query, graph_id, user_id, limit, scope)
-    return FunctionTool(bound_search_memory, description=f"Search Zep memory storage for relevant information in {'graph ' + (graph_id or '') if graph_id else 'user ' + (user_id or '')}.")
+def create_add_node_tool(get_api: GetAPI) -> FunctionTool:
+    async def bound_add_node(
+        name: Annotated[str, "Entity name"],
+        summary: Annotated[str | None, "Optional summary/description"] = None,
+        attributes: Annotated[Dict[str, Any] | None, "Optional attributes dict"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.add_node(name=name, summary=summary, attributes=attributes or {})
+    return FunctionTool(bound_add_node, name="add_node", description="Add node to the current graph scope.")
 
-def create_add_graph_data_tool(client: AsyncZep, graph_id: str | None = None, user_id: str | None = None) -> FunctionTool:
-    if not graph_id and not user_id:
-        raise ValueError("Either graph_id or user_id must be provided when creating the tool")
-    if graph_id and user_id:
-        raise ValueError("Only one of graph_id or user_id should be provided when creating the tool")
+def create_add_edge_tool(get_api: GetAPI) -> FunctionTool:
+    async def add_graph_edge(
+        head_uuid: Annotated[str, "Source node UUID"],
+        relation: Annotated[str, "Edge/Relation type (name)"],
+        tail_uuid: Annotated[str, "Target node UUID"],*,
+        fact: Annotated[str | None, "Optional human-readable fact text"] = None,
+        rating: Annotated[float | None, "Optional relevance rating 0.0–1.0"] = None,
+        attributes: Annotated[Dict[str, Any] | None, "Optional key-value attributes"] = None,
+        valid_at: Annotated[str | None, "ISO8601 valid_from timestamp"] = None,
+        invalid_at: Annotated[str | None, "ISO8601 valid_until timestamp"] = None,
+        expired_at: Annotated[str | None, "ISO8601 expiration timestamp"] = None,
+        graph_id: Annotated[str | None, "Graph ID (omit for user graph ops)"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.add_edge(
+            head_uuid=head_uuid, relation=relation, tail_uuid=tail_uuid,
+            fact=fact, rating=rating, attributes=attributes,
+            valid_at=valid_at, invalid_at=invalid_at, expired_at=expired_at,
+            graph_id=graph_id)
+    return FunctionTool(
+        func=add_graph_edge,
+        name="add_graph_edge",
+        description="Create an edge/fact between two nodes, with optional fact text, rating, and validity window.",)
+
+def create_clone_graph_tool(get_api: GetAPI) -> FunctionTool:
+    async def bound_clone_graph(
+        src_graph_id: Annotated[str, "Source graph ID"],
+        new_label: Annotated[str, "New label for cloned graph"],
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.clone_graph(src_graph_id=src_graph_id, new_label=new_label)
+    return FunctionTool(bound_clone_graph, name="clone_graph", description="Clone a Zep graph with a new label.")
+
+def create_search_graph_tool(get_api: GetAPI) -> FunctionTool:
+    async def search_memory(
+        query: Annotated[str, "The search query to find relevant memories"],*,
+        scope: Annotated[Literal["edges", "nodes", "episodes"] | None, "What to search (edges=default)"] = None,
+        limit: Annotated[int | None, "Max number of results (<=50)"] = None,
+        search_filters: Annotated[Dict[str, Any] | None, "Filter: node_labels/edge_types/..."] = None,
+        reranker: Annotated[str | None, "rrf|mmr|node_distance|episode_mentions|cross_encoder"] = None,
+        center_node_uuid: Annotated[str | None, "Needed for node_distance reranker"] = None,
+        mmr_lambda: Annotated[float | None, "Diversity/relevance tradeoff for mmr"] = None,
+        min_fact_rating: Annotated[float | None, "Minimum fact rating filter (edges)"] = None,
+        bfs_origin_node_uuids: Annotated[List[str] | None, "Limit search to BFS from these nodes"] = None,
+        graph_id: Annotated[str | None, "Custom graph scope"] = None,
+        user_id: Annotated[str | None, "User graph scope"] = None,
+        extra: Annotated[Dict[str, Any] | None, "Additional params passed to Zep search as-is"] = None,
+    ) -> List[Dict[str, Any]]:
+        api = get_api()
+        params: Dict[str, Any] = {
+            "query": query,
+            "limit": limit,
+            "scope": scope,
+            "search_filters": search_filters,
+            "reranker": reranker,
+            "center_node_uuid": center_node_uuid,
+            "mmr_lambda": mmr_lambda,
+            "min_fact_rating": min_fact_rating,
+            "bfs_origin_node_uuids": bfs_origin_node_uuids,
+            "graph_id": graph_id,
+            "user_id": user_id,
+        }
+        if extra:
+            for k, v in extra.items():
+                if v is not None and (k not in params or params[k] is None):
+                    params[k] = v
+        return await api.search(**{k: v for k, v in params.items() if v is not None})
+    return FunctionTool(
+        func=search_memory,
+        name="search_graph",
+        description="Search the Zep graph (edges/nodes/episodes) with optional filters, rerankers, and pass-through params.",)
+
+def create_add_graph_data_tool(get_api: GetAPI) -> FunctionTool:
     async def bound_add_memory_data(
         data: Annotated[str, "The data/information to store in memory"],
-        data_type: Annotated[str, "Type of data: 'text', 'json', or 'message'"] = "text",
-    ) -> dict[str, Any]:
-        return await add_graph_data(client, data, graph_id, user_id, data_type)
-    return FunctionTool(bound_add_memory_data, description=f"Add data to Zep memory storage in {'graph ' + (graph_id or '') if graph_id else 'user ' + (user_id or '')}.")
+        data_type: Annotated[Literal["text","json","message"], "Type of data: 'text', 'json', or 'message'"] = "text",
+        source: Annotated[str | None, "Logical source tag (e.g. 'text'|'message'|'import')"] = None,
+        role: Annotated[str | None, "Speaker role for episode content (e.g. 'user'|'assistant')"] = None,
+        metadata: Annotated[Dict[str, Any] | None, "Arbitrary metadata dict to attach"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.add_data(data=data, data_type=data_type, role=role, source=source, metadata=metadata or {})
+    return FunctionTool(bound_add_memory_data, name="add_graph_data", description="Add data/episode into current graph scope.")
+
+def create_get_graph_item_tool(get_api: GetAPI) -> FunctionTool:
+    async def bound_get_graph_item(kind: Annotated[str, "'node' or 'edge'"], uuid: Annotated[str, "UUID"], *, graph_id: Annotated[str | None, "Graph override"] = None):
+        api = get_api()
+        if kind == "node":
+            return await api.get_node(uuid, graph_id=graph_id)
+        elif kind == "edge":
+            return await api.get_edge(uuid, graph_id=graph_id)
+        raise ValueError("kind must be 'node' or 'edge'")
+    return FunctionTool(bound_get_graph_item, name="get_graph_item", description="Get a node or edge from current graph scope.")
+
+def create_get_node_edges_tool(get_api: GetAPI) -> FunctionTool:
+    async def get_node_edges(
+        node_uuid: Annotated[str, "Node UUID"],
+        *,
+        direction: Annotated[Literal["out", "in", "both"] | None, "Which edges to return"] = None,
+        graph_id: Annotated[str | None, "Graph override"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.get_node_edges(node_uuid=node_uuid, direction=direction, graph_id=graph_id)
+    return FunctionTool(
+        func=get_node_edges,
+        name="get_node_edges",
+        description="List edges connected to a given node.",)
+
+def create_delete_edge_tool(get_api: GetAPI) -> FunctionTool:
+    async def delete_edge(
+        edge_uuid: Annotated[str, "Edge UUID"],
+        *,
+        graph_id: Annotated[str | None, "Graph override"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.delete_edge(edge_uuid=edge_uuid, graph_id=graph_id)
+    return FunctionTool(
+        func=delete_edge,
+        name="delete_edge",
+        description="Delete an edge by UUID.",)
+
+def create_delete_episode_tool(get_api: GetAPI) -> FunctionTool:
+    async def delete_episode(
+        episode_uuid: Annotated[str, "Episode UUID"],
+        *,
+        graph_id: Annotated[str | None, "Graph override"] = None,
+    ) -> Dict[str, Any]:
+        api = get_api()
+        return await api.delete_episode(episode_uuid=episode_uuid, graph_id=graph_id)
+    return FunctionTool(
+        func=delete_episode,
+        name="delete_episode",
+        description="Delete an episode (message/text/json) by UUID.",)

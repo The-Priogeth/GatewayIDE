@@ -1,6 +1,5 @@
-# backend/main.py — FastAPI entrypoint (Slim-HMA kompatibel)
+# backend/main.py — FastAPI entrypoint
 from __future__ import annotations
-
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -37,7 +36,6 @@ async def lifespan(app: FastAPI):
     app.state.t5_thread_id = runtime.t5_thread_id
     app.state.t6_thread_id = runtime.t6_thread_id
 
-    # 🔁 WICHTIG: Slim-HMA legt HMA direkt ab – KEIN dict mehr
     app.state.hma          = runtime.hma            # direkte HMA-Instanz
     app.state.messaging    = runtime.messaging
     app.state.pbuffer_dir  = runtime.pbuffer_dir
@@ -93,4 +91,4 @@ async def add_corr_id(request: Request, call_next):
 # -----------------------------------------------------------------------------#
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Gateway Backend (Slim-HMA) läuft."}
+    return {"status": "ok", "message": "Gateway Backend läuft."}

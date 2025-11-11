@@ -7,7 +7,6 @@ Gateway/
 ├── .env
 ├── demoenv
 ├── pyproject.toml
-├── ARCHITECTURE.dm
 ├── build-win.bat
 ├── uv.lock
 ├── .git/
@@ -37,7 +36,7 @@ Gateway/
 │   │       ├── hma_config.py
 │   │       ├── hma.py
 │   │       ├── routing.py
-│   │       ├── selector.py
+│   │       ├── selectors.py
 │   │       └── speaker.py
 │   └── routes/
 │       ├── __init__.py
@@ -48,7 +47,6 @@ Gateway/
 │       ├── # library_api.py
 │       ├── # settings.py
 │       └── websocket.py
-├── docs/
 ├── logs/
 │   ├── watchdog
 │   └── server

@@ -1,18 +1,33 @@
-# backend/bootstrap.py  — Slim-kompatibel zu konstruktor/hma/selectors/routing
+# backend/bootstrap.py
 from __future__ import annotations
 import os, asyncio
 from types import SimpleNamespace
 from typing import Any, Awaitable, Optional, cast
 from dotenv import load_dotenv, find_dotenv
+from contextvars import ContextVar
 from zep_cloud.client import AsyncZep
 from autogen_core.memory import MemoryContent, MemoryMimeType
-from .memory.memory import ZepMemory
-from .agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
+from autogen_core.tools import FunctionTool  # nur für Typ-Hinweise
 from .agent_core import messaging as _messaging
-from .memory.memory_wrapper import MemoryManager
+from .agent_core.hma.hma_config import DEFAULT_HMA_CONFIG
 from .agent_core.hma.hma import HMA
 from .agent_core.hma.speaker import Speaker
-from contextvars import ContextVar
+from .memory.graph_api import GraphAPIProvider
+from .memory.manager import MemoryManager
+from .memory.memory import ZepMemory
+from .memory.memory_tools import (
+    create_search_graph_tool,
+    create_add_graph_data_tool,
+    create_set_ontology_tool,
+    create_add_node_tool,
+    create_add_edge_tool,
+    create_clone_graph_tool,
+    create_clone_user_graph_tool,
+    create_get_graph_item_tool,
+    create_get_node_edges_tool,
+    create_delete_edge_tool,
+    create_delete_episode_tool,
+)
 
 # global
 corr_id_var: ContextVar[str] = ContextVar("corr_id", default="no-corr")
@@ -156,7 +171,47 @@ async def ensure_runtime() -> SimpleNamespace:
     t5_thread_id, t5_memory = await _ensure_thread(zep, label="t5_task_internal", user_id_env=base_user, thread_id_env=os.getenv("T5_THREAD_ID"))
     t6_thread_id, t6_memory = await _ensure_thread(zep, label="t6_trn_internal",  user_id_env=base_user, thread_id_env=os.getenv("T6_THREAD_ID"))
 
+    # --- Tool-Setup: zentraler GraphAPI-Provider + get_api Callback ----------
+    GRAPH_ID = os.getenv("ZEP_GRAPH_ID", "gateway_main")
+    provider = GraphAPIProvider(client=zep, graph_id=GRAPH_ID, user_id=base_user)
+    get_api = provider.get_api
 
+    tools: list[FunctionTool] = [
+        create_search_graph_tool(get_api),
+        create_add_graph_data_tool(get_api),
+        create_set_ontology_tool(get_api),
+        create_add_node_tool(get_api),
+        create_add_edge_tool(get_api),
+        create_clone_graph_tool(get_api),
+        create_clone_user_graph_tool(get_api),
+        create_get_graph_item_tool(get_api),
+        create_get_node_edges_tool(get_api),
+        create_delete_edge_tool(get_api),
+        create_delete_episode_tool(get_api),
+    ]
+    tool_registry: dict[str, FunctionTool] = {t.name: t for t in tools}
+
+    async def call_tool(name: str, /, **kwargs):
+        """
+        Einheitlicher Aufruf für registrierte FunctionTools.
+        Nutzt bevorzugt .func (async), fällt auf .invoke(**kwargs) zurück.
+        """
+        tool = tool_registry.get(name)
+        if tool is None:
+            raise KeyError(f"Unknown tool: {name}")
+        fn = getattr(tool, "func", None)
+        if callable(fn):
+            res = fn(**kwargs)
+            if asyncio.iscoroutine(res):
+                return await res
+            return res
+        inv = getattr(tool, "invoke", None)
+        if callable(inv):
+            res = inv(kwargs)
+            if asyncio.iscoroutine(res):
+                return await res
+            return res
+        raise RuntimeError(f"Tool {name} has neither async func nor invoke")
 
     # Demos (AG2) bauen und mit DemoAdapter wrappen
     from .ag2.autogen.agentchat import ConversableAgent
@@ -178,36 +233,6 @@ async def ensure_runtime() -> SimpleNamespace:
     ]
     demo_registry = [DemoAdapter(a) for a in raw_demos]
 
-    # (Optional) einfacher Memory-Logger für T1 – bleibt wie gehabt
-    def memory_logger(role: str, name: str, content: str) -> None:
-        async def _w():
-            try:
-                if str(role).lower() == "user":
-                    text = str(content)
-                    await t1_memory.add(MemoryContent(
-                        content=text,
-                        mime_type=MemoryMimeType.TEXT,
-                        metadata={"type": "message", "role": role, "name": name, "thread": "T1"},
-                    ))
-                    # Mini-Name-Extractor (DE)
-                    import re
-                    m = re.search(r"\bmein\s+name\s+ist\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\- ]{2,})\b", text, flags=re.IGNORECASE)
-                    if m:
-                        user_name = m.group(1).strip()
-                        await t1_memory.add(MemoryContent(
-                            content=f"Merke: Der Nutzer heißt {user_name}.",
-                            mime_type=MemoryMimeType.TEXT,
-                            metadata={"type": "message", "role": "system", "name": "Profile", "thread": "T1"},
-                        ))
-            except Exception:
-                pass
-
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(_w())
-        except RuntimeError:
-            asyncio.run(_w())
-
 
     # LLM-Client (Adapter) für HMA
     llm_client = LLMAdapter(model=model_name)
@@ -215,6 +240,8 @@ async def ensure_runtime() -> SimpleNamespace:
 
     runtime_ns = SimpleNamespace(
         zep_client=zep,
+        graph_api_provider=provider,
+        get_api=get_api,
         t1_thread_id=t1_thread_id, t1_memory=t1_memory,
         t2_thread_id=t2_thread_id, t2_memory=t2_memory,
         t3_thread_id=t3_thread_id, t3_memory=t3_memory,
@@ -223,10 +250,20 @@ async def ensure_runtime() -> SimpleNamespace:
         t6_thread_id=t6_thread_id, t6_memory=t6_memory,
         messaging=_messaging,
         pbuffer_dir=None,
-        memory_logger=memory_logger,
+        tools=tools,
+        tool_registry=tool_registry,
+        call_tool=call_tool,
     )
     # zentrale Memory-Fassade (einheitlicher Einstiegspunkt)
-    runtime_ns.memory = MemoryManager(t1_memory)
+    runtime_ns.memory = MemoryManager(t1_memory, get_api=get_api)
+
+    # ---- WICHTIG: GraphAPI in alle ZepMemory-Instanzen injizieren ----------
+    # Dadurch verwenden T1..T6 ausschließlich die zentrale, persistente Instanz.
+    for mem in (t1_memory, t2_memory, t3_memory, t4_memory, t5_memory, t6_memory):
+        try:
+            mem.set_api(get_api)
+        except Exception:
+            pass
 
     # 2) HMA direkt hier konstruieren (reduziert Abhängigkeiten)
     speaker = Speaker(runtime=runtime_ns)

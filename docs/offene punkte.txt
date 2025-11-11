@@ -1,142 +1,216 @@
-# 🧩 GatewayIDE Refactoring & Konsolidierung (Vor Agent-HQ-Integration)
+# 🧩 GatewayIDE – Offene Punkte (Refactoring & Konsolidierung)
+
+> **Ziel:** Vollständige Übersicht aller anstehenden Aufgaben und strukturellen Maßnahmen zur Vorbereitung der Agent‑HQ‑Integration.
+> **Status:** Aktiv (Stand: 2025‑11‑08)
+> **Referenzen:** [root.md](../root.md) · [Filestrukture.md](../Filestrukture.md) · [GatewayIDE_2025‑11‑08.md](../status/GatewayIDE_2025‑11‑08.md)
 
 ---
 
-## 🗎 Dokumentation & Strukturpflege
+## 🧭 A. Überblick & Zweck
 
-* **root.md** – Inhalts- und Zustandsübersicht aktualisieren.
-* **ARCHITECTURE.md** – an aktuellen technischen Stand anpassen (Module, Threads, Zep, HMA).
-* **README.md** – als Einstiegspunkt: *Quickstart, Build, Run, Tabs/Navigation*.
-* **services/GatewayAI/ai_service/** – Verschachtelung reduzieren (max. eine Ebene).
-* **GatewayIDE.App/ViewModels/MainWindowViewModel.cs** – modularisieren (z. B. Unterordner `Tabs/` mit eigenen ViewModels).
-* **/routes** – Einzeldateien ergänzen, sobald Endpoint-Liste feststeht.
+**Absicht:** Diese Datei dient als zentrales Arbeitsprotokoll für Refactoring, Modularisierung und Konsolidierung des GatewayIDE‑Backends und der Avalonia‑App.
+Sie ersetzt ältere Textlisten und konsolidiert frühere Notizen, damit alle Aufgaben in einem strukturierten, nachvollziehbaren Format vorliegen.
 
----
-
-## 🧠 1. Memory & Kontextverwaltung (Zep)
-
-**Ziel:** Redundanzen beseitigen, zentrale Memory-Logik über Zep oder lokales Modul.
-
-**Subtasks:**
-
-* Entscheidung:
-
-  * Zep vollständig nutzen **oder** Fallback-Speicher entfernen.
-* Wenn **Zep aktiv:**
-
-  * API-Verwendung prüfen (`graph.search`, `thread.add_messages`, `memory.context`).
-  * Manuelle Kontextblöcke entfernen.
-  * Einheitliche Schnittstelle (`MemoryManager`) implementieren.
-* Wenn **Zep deaktiviert:**
-
-  * Lokales Memory kapseln.
-  * Alle Zep-Spezifika entfernen.
+**Status‑Symbole:**
+🟢 erledigt · 🟠 in Arbeit · 🔶 teils erledigt · 🔴 offen · ⚪ geparkt
 
 ---
 
-## 🤖 2. Agentenstruktur & Selektoren
+## 📘 B. Dokumentation & Strukturpflege
 
-**Ziel:** Einheitliche Agenten-API, kein doppelter Code, klarer Dispatch.
+### [DOC‑01] root.md aktualisieren
 
-**Subtasks:**
+**Ziel:** Blöcke für alle aktiv genutzten Dateien ergänzen und abgleichen.
+**Kontext:** Dokumentationsabgleich und Synchronisation mit Filestruktur.
+**Betroffen:** `root.md`
+**Status:** 🔶 teils erledigt
+**Aktion:** Blöcke prüfen/ergänzen für `backend/memory/*`, `backend/agent_core/hma/*`, `deploy/*`, `GatewayIDE.App/*`.
 
-* Gemeinsames Interface: `Agent.respond(query)`.
-* Personal- und GPT-Agenten vereinheitlichen.
-* Einheitliches Antwortformat für Demos / Ich-Aggregation.
-* Aggregation (Ich) und Speaker klar trennen oder bewusst integrieren.
-* Selektoren abstrahieren (Mapping / Strategie-Pattern).
-* Zielwahl modularisieren (`dispatchTarget()`-Funktion).
+### [DOC‑02] README / ARCHITECTURE
 
----
-
-## 📦 3. Backend-Aufbau & Modularität
-
-**Ziel:** Klare Verantwortlichkeiten, saubere Imports, Wiederverwendbarkeit.
-
-**Subtasks:**
-
-* Agenten-Logik in `agents/` auslagern.
-* Lebenszyklus zentralisieren (`init()`, `start()`, `reset()`).
-* Zustände kapseln (keine globalen Maps).
-* Memory-Handling in eigenem Modul (`memory/`).
-* Einheitliche Speicherstruktur (Queue, DB etc.).
-* Wiederholte Formatierungen vermeiden.
-* HMA-Kommunikation extrahieren: `HMAClient(init, send, fetch, retry)`.
-* Tokens / Endpoints zentral konfigurieren.
-* Zentrales Konfigurationssystem: `.env`, `config.json` oder `settings.yaml`.
+**Ziel:** Einstiegspunkt und technische Architektur auf aktuellen Slim‑HMA‑Stand bringen.
+**Kontext:** Anpassung an konsolidierte Systemstruktur (Threads, Module, Routing).
+**Betroffen:** `docs/README.md`, `docs/ARCHITECTURE.md`
+**Status:** 🔴 offen
+**Quelle:** `GatewayIDE_2025‑11‑08.md` als Basis.
 
 ---
 
-## 🚀 4. Bootstrap & Startlogik
+## ⚙️ C. Technische Hauptbereiche
 
-**Ziel:** Klare Startsequenz, kein „toter“ Code.
+### 1️⃣ Memory & Kontextverwaltung (Zep)
 
-**Subtasks:**
+#### [MEM‑01] Entscheidung Zep vs. Fallback
 
-* `bootstrap()` in Phasen gliedern:
+**Ziel:** Zep vollständig nutzen oder lokale Fallbacks entfernen.
+**Kontext:** Vereinheitlichung der Speicherlogik (Thread+Graph) zur Fehlervermeidung.
+**Betroffen:** `backend/memory/*`, `backend/bootstrap.py`, `backend/agent_core/*`
+**Status:** 🟠 in Arbeit
+**Aktion:** `ZepMemory` als zentrale Fassade bestätigen; lokale Fallbacks entfernen.
 
-  * `loadConfig()`, `connectHMA()`, `initAgents()`, `initMemory()`.
-* Async-Abläufe konsistent verketten (await / Promise / Event).
-* Alte Startcodes & Tests entfernen.
-* Startprozess dokumentieren (README oder Docstring).
+#### [MEM‑02] API‑Nutzung & Limits
 
----
+**Ziel:** Längenbegrenzungen (2 500 Zeichen) technisch abfedern (Chunking, Summaries).
+**Kontext:** Verbesserung der Stabilität bei großen Antwortblöcken über Zep‑API.
+**Betroffen:** `backend/agent_core/hma/speaker.py`, `backend/memory/memory.py`
+**Status:** 🔴 offen
+**Aktion:** Chunk‑Write + Episode‑Summary in `add_message()` implementieren.
 
-## 💬 5. Chat-Routing & Nachrichtenfluss
+#### [MEM‑03] Einheitlicher Kontext
 
-**Ziel:** Übersichtliche Struktur statt verschachtelter Bedingungen.
-
-**Subtasks:**
-
-* `ChatRouter` modularisieren (Handler pro Nachrichtentyp).
-* Dispatch-Table einsetzen: `handlers[message.type]()`.
-* Logging & Fehlerhandling zentralisieren (Middleware / Wrapper).
-* Kommunikation nur über Schnittstellen (keine Direktmanipulation am Memory).
-
----
-
-## 📡 6. GRPC vs REST – Evaluationsphase
-
-**Ziel:** Technische Entscheidung vorbereiten, nicht voreilig treffen.
-
-**Subtasks:**
-
-* Entscheidungsmatrix: Vorteile / Nachteile in deinem Szenario.
-* Nur aktivieren bei geplanter Diensttrennung oder Streaming.
-* Optional: gRPC-Stub für internes Agentenprotokoll vorbereiten.
+**Ziel:** Nur eine Stelle baut Prompt‑Kontext; UI zieht über `/chat`‑Flow.
+**Kontext:** Zusammenführung der Kontextgenerierung zur Minimierung doppelter Speicherzugriffe.
+**Betroffen:** `backend/memory/memory.py`, `backend/routes/chat_api.py`, `backend/bootstrap.py`
+**Status:** 🔶 teils erledigt
 
 ---
 
-## 🧹 7. Cleanup & Vereinheitlichung
+### 2️⃣ Agentenstruktur & Routing
 
-**Ziel:** Lesbarkeit, Wartbarkeit, Zukunftssicherheit.
+#### [AGT‑01] Einheitliche Agenten‑API
 
-**Subtasks:**
+**Ziel:** Einheitliches Interface `Agent.respond(query)` und konsistentes Antwortformat.
+**Kontext:** Harmonisierung der internen Kommunikationslogik zwischen Demos und Ich‑Aggregation.
+**Betroffen:** `backend/agent_core/hma/hma.py`, `backend/agent_core/hma/selectors.py`
+**Status:** 🔶 teils erledigt
 
-* Alte Tests & Funktionen löschen.
-* Doppelte Logik zusammenführen (DRY-Prinzip).
-* Linting/Formatierung einführen: *black, isort, flake8, prettier.*
-* Basis-Unit-Tests: Agent / Memory / HMA-Kommunikation.
+#### [AGT‑02] Speaker vs. Aggregation
+
+**Ziel:** Trennung zwischen Aggregation (HMA) und Persistenz/Routing (Speaker).
+**Kontext:** Saubere Verantwortlichkeit zwischen Datenfluss und Ergebnisaggregation.
+**Betroffen:** `backend/agent_core/hma/hma.py`, `backend/agent_core/hma/speaker.py`
+**Status:** 🔶 teils erledigt
+
+#### [ROUTE‑01] Route‑Parser stabilisieren
+
+**Ziel:** `<<<ROUTE>>> {…} <<<END>>>` robust parsen, Fallback: letztes JSON‑Objekt mit `deliver_to`.
+**Kontext:** Sicherstellung korrekter Routenauswertung bei Markdown‑ oder Fence‑Formaten.
+**Betroffen:** `backend/agent_core/hma/routing.py`
+**Status:** 🔶 teils erledigt
 
 ---
 
-## ⚙️ Redundanz- und Konsolidierungsnotizen
+### 3️⃣ Backend‑Aufbau & Bootstrap
 
-| Thema                                                   | Status                 | Nächster Schritt                                                                                                         |
-| :------------------------------------------------------ | :--------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| **Memory-Schicht (Fassade vs zep_autogen)**             | Teilweise gelöst       | `zep_autogen` als Kompatibilitäts-Layer markieren, intern auf `ZepMemory` durchreichen (Deprecation-Header, Re-exports). |
-| **Routing / Thread-Mapping**                            | Offen                  | Eine Quelle: Backend liefert Mapping via `/meta`-Endpoint oder Konstanten; UI liest nur.                                 |
-| **gRPC vs REST/WS**                                     | Offen                  | gRPC als Dev/Test-Double labeln; im Prod-Build deaktivieren.                                                             |
-| **Prozessausführung (DockerService vs ProcessManager)** | Offen                  | `ProcessManager` nur behalten, falls Non-Docker-Tools benötigt.                                                          |
-| **Kontextaufbau**                                       | Weitgehend geklärt     | Utility `context_builder.py` einführen; `zep_autogen` darauf umleiten.                                                   |
-| **Logging / Telemetry**                                 | Offen                  | Zentrales Korrelation-Schema (`corr_id`, `thread`, `role`, `route`) in `messaging`.                                      |
-| **Build-/Runtime-Pfad (CMD vs Compose)**                | Offen                  | Prod: Dockerfile-CMD = `backend.main:app`; Dev: Compose-Override dokumentieren.                                          |
-| **Konfiguration (.env vs Hardcode)**                    | Offen                  | Endpoints ausschließlich aus Settings/ENV lesen.                                                                         |
-| **Zep-Graph-Operationen**                               | Offen                  | `zep_autogen/graph` auf `ZepGraphAdmin` durchrouten.                                                                     |
-| **Thread-/User-IDs**                                    | Teilweise konsolidiert | „Single Source“ = Bootstrap; UI nur Anzeige.                                                                             |
-| **gRPC-Protobuf (Client + Server)**                     | Offen                  | Proto an einem Ort pflegen; Server → `tests/`.                                                                           |
-| **UI-Layoutsteuerung**                                  | Offen                  | Konstanten / Converter zentralisieren (`HalfConverter`).                                                                 |
-| **Dev-Container-Lifecycle**                             | Offen                  | Build-Script nur für Headless-Builds; UI steuert Laufzeit.                                                               |
-| **Heuristik / Findings**                                | Offen                  | Eine Entscheidungsstelle (HMA-Pfad).                                                                                     |
-| **uv.lock**                                             | Offen                  | Lock neu erzeugen, Plattform-Einträge prüfen.                                                                            |
+#### [BOOT‑01] Phasen‑Bootstrap
+
+**Ziel:** `ensure_runtime()` modularisieren (loadConfig, initMemory, initAgents, connectHMA).
+**Kontext:** Stabilisierung der Startlogik und klare Ablaufstruktur für Initialisierung.
+**Betroffen:** `backend/bootstrap.py`
+**Status:** 🟠 in Arbeit
+
+#### [API‑01] Chat‑Router vereinfachen
+
+**Ziel:** Handler pro Nachrichtentyp (Dispatch‑Table), zentrales Fehler‑Logging.
+**Kontext:** Vereinfachung der Nachrichtenverarbeitung und Reduktion verschachtelter Bedingungen.
+**Betroffen:** `backend/routes/chat_api.py`
+**Status:** 🔶 teils erledigt
+
+---
+
+### 4️⃣ Transport & Konfiguration (gRPC / REST)
+
+#### [NET‑01] gRPC optional halten
+
+**Ziel:** REST/WS als produktiver Pfad, gRPC nur als Dev‑Double.
+**Kontext:** Technische Flexibilität für zukünftige Diensttrennung oder Streaming.
+**Betroffen:** `GatewayIDE.App/*.csproj`, `protos/ai_service.proto`, `services/GatewayAI/ai_service/*`
+**Status:** 🔶 teils erledigt
+
+#### [CFG‑01] ENV‑Konvention
+
+**Ziel:** Endpoints & Keys ausschließlich aus `.env` oder Settings laden.
+**Kontext:** Vermeidung von Hardcode‑Werten und Sicherstellung konfigurierbarer Laufzeitumgebungen.
+**Betroffen:** `backend/bootstrap.py`, `backend/main.py`
+**Status:** 🔶 teils erledigt
+
+---
+
+### 5️⃣ Observability & Logging
+
+#### [LOG‑01] Einheitliches Schema
+
+**Ziel:** Einheitliches Logging‑Schema mit `corr_id`, `thread`, `role`, `route`.
+**Kontext:** Einheitliche Nachvollziehbarkeit der Datenflüsse und Fehlerpfade.
+**Betroffen:** `backend/agent_core/messaging.py`, `backend/main.py`
+**Status:** 🔴 offen
+
+#### [LOG‑02] Fehlertrennung & Filter
+
+**Ziel:** Getrennte Streams (stdout/stderr) und Filter nach T1–T6.
+**Kontext:** Bessere Übersicht im Logging der parallelen Threads.
+**Betroffen:** `GatewayIDE.App/MainWindow.axaml` + ViewModel
+**Status:** 🔶 teils erledigt
+
+---
+
+### 6️⃣ UI (Avalonia)
+
+#### [UI‑01] Grid‑Bindings stabilisieren
+
+**Ziel:** Keine String‑zu‑GridLength‑Fehler; Converter zentralisieren.
+**Kontext:** Korrekte Typbindung für Avalonia‑Layouts.
+**Betroffen:** `GatewayIDE.App/ViewModels/MainWindowViewModel.cs`, `GatewayIDE.App/Converters.cs`
+**Status:** 🔶 teils erledigt
+
+#### [UI‑02] Tabs entkoppeln
+
+**Ziel:** Sichtbarkeit eines Tabs darf keine anderen Layouts beeinflussen.
+**Kontext:** Isolierte Darstellung der einzelnen Arbeitsbereiche.
+**Betroffen:** `GatewayIDE.App/MainWindow.axaml`, ViewModel
+**Status:** 🔶 teils erledigt
+
+#### [UI‑03] KI‑System‑Telemetry
+
+**Ziel:** T2/T4/T5/T6‑Boards mit Auto‑Scroll & Caret‑Bind implementieren.
+**Kontext:** Vollständige Sichtbarkeit der Agenten‑Kommunikation im Live‑System.
+**Betroffen:** `GatewayIDE.App/MainWindow.axaml`, ViewModel
+**Status:** 🟠 in Arbeit
+
+---
+
+## 🧮 D. Redundanz‑ & Konsolidierungsnotizen
+
+| Thema                                               | Status                 | Zugehöriger Task / Nächster Schritt                                                      |
+| :-------------------------------------------------- | :--------------------- | :--------------------------------------------------------------------------------------- |
+| Memory‑Schicht (Fassade vs. zep_autogen)            | Teilweise gelöst       | [MEM‑01] – `zep_autogen` als Kompatibilitäts‑Layer, intern auf `ZepMemory` durchreichen. |
+| Routing / Thread‑Mapping                            | Offen                  | Einheitliche Quelle via `/meta`‑Endpoint oder Konstanten.                                |
+| gRPC vs REST/WS                                     | Offen                  | gRPC als Dev‑Double, Prod = REST/WS.                                                     |
+| Prozessausführung (DockerService vs ProcessManager) | Offen                  | Nur behalten, falls Non‑Docker‑Tools benötigt.                                           |
+| Kontextaufbau                                       | Weitgehend geklärt     | Utility `context_builder.py` ergänzen.                                                   |
+| Logging / Telemetry                                 | Offen                  | Zentrales Korrelation‑Schema in `messaging`.                                             |
+| Build-/Runtime‑Pfad                                 | Offen                  | Prod: Dockerfile‑CMD = `backend.main:app`; Dev‑Override dokumentieren.                   |
+| Konfiguration (.env vs Hardcode)                    | Offen                  | Endpoints ausschließlich aus ENV.                                                        |
+| Zep‑Graph‑Operationen                               | Offen                  | `zep_autogen/graph` auf `ZepGraphAdmin` routen.                                          |
+| Thread-/User‑IDs                                    | Teilweise konsolidiert | Single Source = Bootstrap.                                                               |
+| gRPC‑Protobuf (Client + Server)                     | Offen                  | Protobuf an einem Ort pflegen (`tests/`).                                                |
+| UI‑Layoutsteuerung                                  | Offen                  | Konstanten/Converter zentralisieren (`HalfConverter`).                                   |
+| Dev‑Container‑Lifecycle                             | Offen                  | Build‑Script nur für Headless‑Builds; UI steuert Laufzeit.                               |
+| Heuristik / Findings                                | Offen                  | Eine Entscheidungsstelle (HMA‑Pfad).                                                     |
+| uv.lock                                             | Offen                  | Lock neu erzeugen, Plattform‑Einträge prüfen.                                            |
+
+---
+
+## 🧰 E. Nächste konkrete Edits
+
+1. `GatewayIDE.txt` → `docs/status/GatewayIDE_2025‑11‑08.md` migrieren (Kopf mit Datum + Konsolidierungsstatus).
+2. `root.md` ergänzen um Blöcke für `GatewayIDE.App/*` (präzise Einzeiler).
+3. `routing.py`: Parser‑Normalize‑Step (Fence/Markdown cleanup).
+4. `speaker.py`: Chunk‑Write + Episode‑Summary (siehe [MEM‑02]).
+5. `Converters.cs`: alle Grid‑Größen über zentralen Converter leiten.
+
+---
+
+## ✅ F. Abnahme‑Checkliste (Definition of Done)
+
+* Alle Tasks mit Dateipfaden verknüpft (root‑Blöcke existieren).
+* Build (Backend & App) fehlerfrei.
+* `/chat`‑Flow stabil mit Kontext aus **einer** Quelle.
+* Logs enthalten `corr_id`/`thread`/`role`/`route`.
+* UI zeigt T2/T4/T5/T6‑Boards ohne Layout‑Seiteneffekte.
+
+---
+
+> **Hinweis:** Diese Datei wird fortlaufend gepflegt.
+> Nach jeder abgeschlossenen Etappe soll der Status (🟢 / 🟠 / 🔶 / 🔴 / ⚪) in den jeweiligen Unterpunkten aktualisiert werden.
 
