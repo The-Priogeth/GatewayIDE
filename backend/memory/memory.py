@@ -23,12 +23,211 @@ from zep_cloud.core.api_error import ApiError
 # from zep_cloud.thread import Message, Role
 from datetime import datetime
 import logging
+import time
+import uuid
 logger = logging.getLogger(__name__)
 
 class MemoryBackendError(RuntimeError):
     pass
 
+######################################################################################################
+# Hauptklasse: ZepMemory
+######################################################################################################
+class ZepMemory(Memory):
+    def __init__(self,client: AsyncZep, user_id: str, thread_id: Optional[str] = None, **kwargs: Any) -> None:
+        if not isinstance(client, AsyncZep):
+            raise TypeError("client must be an instance of AsyncZep")
+        if not user_id:
+            raise ValueError("user_id is required")
+        self._client: AsyncZep = client
+        self._user_id: str = user_id
+        self._config = kwargs
+        self._logger = logging.getLogger(__name__)
+        self._thread = ZepThreadMemory(self._client, self._user_id, thread_id=thread_id)
+        self._get_api_cb: Optional[Callable[[], Any]] = None
+        self._reset_after: float | None = None
 
+    @property
+    def thread_id(self) -> Optional[str]:
+        return self._thread.thread_id
+    
+    @property
+    def user_id(self) -> str | None:
+        return self._user_id
+
+    def set_api(self, get_api: Callable[[], Any]) -> None:
+        self._get_api_cb = get_api
+
+    def _get_api(self):
+        if not self._get_api_cb:
+            raise RuntimeError("GraphAPI ist nicht injiziert. Bitte via set_api(...) setzen.")
+        return self._get_api_cb()
+
+    def start_new_chat(self, new_thread: bool = False) -> None:
+        if new_thread:
+            new_id = f"thread_chat_{uuid.uuid4().hex[:8]}"
+            self.set_thread(new_id)
+        else:
+            self._reset_after = time.time()
+            self._thread._reset_after = self._reset_after  # ← Weitergeben
+
+    def set_thread(self, thread_id: Optional[str]) -> None:
+        self._thread.set_thread(thread_id)
+
+    async def ensure_thread(self) -> str:
+        # Single-Source-Policy: nur ZepThreadMemory kümmert sich um Erstellung/Check
+        return await self._thread.ensure_thread(force_check=True)
+    
+    async def add(self, content: MemoryContent, cancellation_token: CancellationToken | None = None, *args, **kwargs) -> None:
+        _ = cancellation_token; _ = args; _ = kwargs  # silence unused
+        supported = {MemoryMimeType.TEXT, MemoryMimeType.MARKDOWN, MemoryMimeType.JSON}
+        if content.mime_type not in supported:
+            raise ValueError(
+                f"Unsupported mime type: {content.mime_type}. "
+                f"ZepMemory only supports: {', '.join(str(mt) for mt in supported)}")
+        meta = content.metadata.copy() if content.metadata else {}
+        content_type = meta.get("type", "data")
+        if content_type == "message":
+            from .memory_utils import prepare_message_dict
+            role = meta.get("role", "user")
+            name = meta.get("name")
+            also_graph = bool(meta.get("also_graph", False))
+            text = str(content.content)
+            msg = prepare_message_dict(role, text, name=name)
+            await self._thread.add_messages([msg], ignore_roles=meta.get("ignore_roles"))
+            if also_graph and not self._thread._is_local:
+                try:
+                    api = self._get_api()
+                    await api.add_raw_data(
+                        user_id=self._user_id,
+                        data_type="message",
+                        data=str(text),
+                        role=role,
+                        source="thread",
+                        metadata={"thread_id": self._thread.thread_id},
+                    )
+                except Exception as e:
+                    self._logger.debug(f"graph-add skipped: {e}")
+            return
+        if self._thread._is_local:
+            return None
+        if content_type == "data":
+            mime_to_type = {
+                MemoryMimeType.TEXT: "text",
+                MemoryMimeType.MARKDOWN: "text",
+                MemoryMimeType.JSON: "json",}
+            data_type = mime_to_type.get(content.mime_type, "text")
+            api = self._get_api()
+            await api.add_raw_data(user_id=self._user_id, data_type=data_type, data=str(content.content))
+            return
+        raise ValueError(f"Unsupported metadata type: {content_type}. Supported: 'message', 'data'")
+
+    async def add_episode(self, content: str, source: str = "agent", role: str | None = None, **attributes: Any) -> None:
+        payload = {
+            "kind": "episode",
+            "content": content,
+            "source": source,
+            "role": role,
+            "ts": datetime.utcnow().isoformat(),
+            **attributes,
+        }
+        await self.add(MemoryContent(content=payload,mime_type=MemoryMimeType.JSON,metadata={"type": "data"},))
+
+    async def search(self,query: str,*,k: int = 10,tags: Optional[list[str]] = None,**kwargs: Any,) -> list[MemoryContent]:
+        _ = tags  # reserved (zukünftige Tag-Filter)
+        limit = int(kwargs.pop("limit", k))
+        try:
+            api = self._get_api()
+            items: list[dict[str, Any]] = await api.search(query=query, limit=limit, **kwargs)
+        except Exception as e:
+            self._logger.warning(f"graph.search failed: {e}")
+            return []
+        out: list[MemoryContent] = []
+        for d in items:
+            if not isinstance(d, dict):
+                continue
+            t = str(d.get("type") or "").strip().lower()
+            content = str(d.get("content") or "").strip()
+            meta = {k: v for k, v in d.items() if k not in ("type", "content")}
+            meta.update({"source": "graph", "kind": t or "item"})
+            out.append(MemoryContent(content=content, mime_type=MemoryMimeType.TEXT, metadata=meta))
+        return out
+
+    async def clear(self) -> None:
+        try:
+            if self._thread.thread_id:
+                await self._client.thread.delete(thread_id=self._thread.thread_id)
+        except Exception as e:
+            self._logger.error(f"Error clearing Zep memory: {e}")
+            raise
+
+    async def close(self) -> None:
+        return None
+    
+    async def query(
+        self,
+        query: str | MemoryContent,
+        cancellation_token: CancellationToken | None = None,
+        **kwargs: Any,
+    ) -> MemoryQueryResult:
+        _ = cancellation_token
+        raw_limit = kwargs.pop("limit", 5)
+        if isinstance(query, MemoryContent):
+            q_str = str(query.content)
+        else:
+            q_str = str(query)
+        contents = await self.search(q_str, k=raw_limit, **kwargs)
+        return MemoryQueryResult(results=contents)
+
+    async def update_context(self, model_context: ChatCompletionContext) -> UpdateContextResult:
+        try:
+            if not self._thread.thread_id:
+                return UpdateContextResult(memories=MemoryQueryResult(results=[]))
+            block = await self._thread.build_context_block(include_recent=True, recent_limit=10)
+            memory_contents = []
+            if block:
+                memory_contents.append(
+                    MemoryContent(
+                        content=block,
+                        mime_type=MemoryMimeType.TEXT,
+                        metadata={"source": "thread_context"},))
+                try:
+                    await model_context.add_message(SystemMessage(content=block))
+                except Exception as ie:
+                    self._logger.debug(f"Context injection skipped: {ie}")
+            return UpdateContextResult(memories=MemoryQueryResult(results=memory_contents))
+        except Exception as e:
+            self._logger.error(f"Error updating context with Zep memory: {e}")
+            return UpdateContextResult(memories=MemoryQueryResult(results=[]))
+
+    async def get_context(self,include_recent: bool = True,graph: bool = False,graph_filters: dict[str, Any] | None = None,recent_limit: int = 10,) -> str:
+        parts: list[str] = []
+        try:
+            if include_recent and self._thread:
+                block = await self._thread.build_context_block(
+                    include_recent=True, recent_limit=recent_limit)
+                if block:
+                    parts.append(block)
+        except Exception as e:
+            self._logger.debug(f"thread-context skipped: {e}")
+        if graph and not self._thread._is_local:
+            try:
+                params: dict[str, Any] = {"limit": 5}
+                if graph_filters:
+                    params.update(graph_filters)
+                api = self._get_api()
+                items: list[dict[str, Any]] = await api.search(query="*", **params)
+                lines: list[str] = []
+                for it in items:
+                    c = str(it.get("content") or "").strip()
+                    if c:
+                        lines.append(f"- {c}")
+                if lines:
+                    parts.append("Memory graph (compact):\n" + "\n".join(lines))
+            except Exception as e:
+                self._logger.debug(f"graph-context skipped: {e}")
+        ctx = "\n\n".join([p for p in parts if p and p.strip()]) or ""
+        return ctx
 
 
 # -------------------------------
@@ -40,18 +239,19 @@ class ZepThreadMemory:
         self._user_id = user_id
         self._thread_id = thread_id
         self._default_context_mode = default_context_mode
+        self._reset_after: float | None = None
 
     @property
     def thread_id(self) -> Optional[str]:
         return self._thread_id
 
-    def set_thread(self, thread_id: Optional[str]) -> None:
-        self._thread_id = thread_id
-
     @property
     def _is_local(self) -> bool:
         tid = self._thread_id or ""
         return str(tid).startswith("local_")
+
+    def set_thread(self, thread_id: Optional[str]) -> None:
+        self._thread_id = thread_id
 
     async def ensure_thread(self, force_check: bool = False) -> str:
         if not self._thread_id:
@@ -72,7 +272,6 @@ class ZepThreadMemory:
                 else:
                     raise
         return self._thread_id
-    
 
     async def add_messages(self, messages: list[dict[str, Any]], *, ignore_roles: list[str] | None = None) -> None:
         from .memory_utils import prepare_message_dict, chunk_messages
@@ -92,7 +291,6 @@ class ZepThreadMemory:
                 norm.append(item)
         if not norm:
             return
-        # Zep-Limit-Schutz: in Blöcken senden
         try:
             for batch in chunk_messages(norm, max_batch=30):
                 await self._client.thread.add_messages(thread_id=thread_id, messages=batch, ignore_roles=ignore_roles or [])
@@ -120,7 +318,6 @@ class ZepThreadMemory:
         try:
             resp = await self._client.thread.get(thread_id=self._thread_id)
             raw = getattr(resp, "messages", None) or []
-            # in einfache Dicts umgießen
             tmp = []
             for m in raw:
                 if isinstance(m, dict):
@@ -134,7 +331,6 @@ class ZepThreadMemory:
         except Exception as e:
             logger.error("thread.get failed in list_recent_messages", exc_info=True)
             raise MemoryBackendError(f"thread.get failed: {e}") from e
-
 
     async def get_user_context(self, mode: Optional[str] = None) -> str:
         if not self._thread_id or self._is_local:
@@ -154,8 +350,15 @@ class ZepThreadMemory:
 
         if include_recent:
             recent = await self.list_recent_messages(limit=recent_limit)
+
+            if self._reset_after and recent:
+                recent = [
+                    m for m in recent
+                    if not m.get("created_at") or
+                    time.mktime(time.strptime(m["created_at"][:19], "%Y-%m-%dT%H:%M:%S")) >= self._reset_after
+                ]
+
             if recent:
-                # ggf. kürzen pro Zeile (optional)
                 lines = []
                 for m in recent:
                     content = str(m["content"])
@@ -165,7 +368,6 @@ class ZepThreadMemory:
                 parts.append("Recent conversation:\n" + "\n".join(lines))
 
         return "\n\n".join(parts)
-
 
 
 ######################################################################################################
@@ -341,207 +543,4 @@ class ZepGraphAdmin:
         except Exception as e:
             logger.error("graph.search failed", exc_info=True)
             raise
-
-
-######################################################################################################
-# Hauptklasse: ZepMemory
-######################################################################################################
-class ZepMemory(Memory):
-    def __init__(self,client: AsyncZep, user_id: str, thread_id: Optional[str] = None, **kwargs: Any) -> None:
-        if not isinstance(client, AsyncZep):
-            raise TypeError("client must be an instance of AsyncZep")
-        if not user_id:
-            raise ValueError("user_id is required")
-        self._client: AsyncZep = client
-        self._user_id: str = user_id
-        self._config = kwargs
-        self._logger = logging.getLogger(__name__)
-        self._thread = ZepThreadMemory(self._client, self._user_id, thread_id=thread_id)
-        self._get_api_cb: Optional[Callable[[], Any]] = None
-
-    def set_api(self, get_api: Callable[[], Any]) -> None:
-        """Dependency Injection: zentrale GraphAPI-Instanz (pro User-Scope)."""
-        self._get_api_cb = get_api
-
-    def _get_api(self):
-        if not self._get_api_cb:
-            raise RuntimeError("GraphAPI ist nicht injiziert. Bitte via set_api(...) setzen.")
-        return self._get_api_cb()
-
-
-
-    
-    @property
-    def thread_id(self) -> Optional[str]:
-        return self._thread.thread_id
-    
-    @property
-    def user_id(self) -> str | None:
-        return self._user_id
-
-    def set_thread(self, thread_id: Optional[str]) -> None:
-        self._thread.set_thread(thread_id)
-
-
-    async def ensure_thread(self) -> str:
-        # Single-Source-Policy: nur ZepThreadMemory kümmert sich um Erstellung/Check
-        return await self._thread.ensure_thread(force_check=True)
-    
-    async def add(self, content: MemoryContent, cancellation_token: CancellationToken | None = None, *args, **kwargs) -> None:
-        _ = cancellation_token; _ = args; _ = kwargs  # silence unused
-        supported = {MemoryMimeType.TEXT, MemoryMimeType.MARKDOWN, MemoryMimeType.JSON}
-        if content.mime_type not in supported:
-            raise ValueError(
-                f"Unsupported mime type: {content.mime_type}. "
-                f"ZepMemory only supports: {', '.join(str(mt) for mt in supported)}")
-        meta = content.metadata.copy() if content.metadata else {}
-        content_type = meta.get("type", "data")
-        if content_type == "message":
-            from .memory_utils import prepare_message_dict
-            role = meta.get("role", "user")
-            name = meta.get("name")
-            also_graph = bool(meta.get("also_graph", False))
-            text = str(content.content)
-            msg = prepare_message_dict(role, text, name=name)
-            await self._thread.add_messages([msg], ignore_roles=meta.get("ignore_roles"))
-            if also_graph and not self._thread._is_local:
-                try:
-                    api = self._get_api()
-                    await api.add_raw_data(
-                        user_id=self._user_id,
-                        data_type="message",
-                        data=str(text),
-                        role=role,
-                        source="thread",
-                        metadata={"thread_id": self._thread.thread_id},
-                    )
-                except Exception as e:
-                    self._logger.debug(f"graph-add skipped: {e}")
-            return
-        if self._thread._is_local:
-            return None
-        if content_type == "data":
-            mime_to_type = {
-                MemoryMimeType.TEXT: "text",
-                MemoryMimeType.MARKDOWN: "text",
-                MemoryMimeType.JSON: "json",}
-            data_type = mime_to_type.get(content.mime_type, "text")
-            api = self._get_api()
-            await api.add_raw_data(user_id=self._user_id, data_type=data_type, data=str(content.content))
-            return
-        raise ValueError(f"Unsupported metadata type: {content_type}. Supported: 'message', 'data'")
-
-    async def add_episode(self, content: str, source: str = "agent", role: str | None = None, **attributes: Any) -> None:
-        payload = {
-            "kind": "episode",
-            "content": content,
-            "source": source,
-            "role": role,
-            "ts": datetime.utcnow().isoformat(),
-            **attributes,
-        }
-        await self.add(MemoryContent(content=payload,mime_type=MemoryMimeType.JSON,metadata={"type": "data"},))
-
-    async def search(self,query: str,*,k: int = 10,tags: Optional[list[str]] = None,**kwargs: Any,) -> list[MemoryContent]:
-        _ = tags  # reserved (zukünftige Tag-Filter)
-        limit = int(kwargs.pop("limit", k))
-        try:
-            api = self._get_api()
-            # GraphAPI liefert bereits normalisierte Dicts (edge|node|episode)
-            items: list[dict[str, Any]] = await api.search(query=query, limit=limit, **kwargs)
-        except Exception as e:
-            self._logger.warning(f"graph.search failed: {e}")
-            return []
-        # Einheitlicher, dünner Mapper → MemoryContent (keine eigene Normalisierung)
-        out: list[MemoryContent] = []
-        for d in items:
-            if not isinstance(d, dict):
-                continue
-            t = str(d.get("type") or "").strip().lower()
-            content = str(d.get("content") or "").strip()
-            meta = {k: v for k, v in d.items() if k not in ("type", "content")}
-            meta.update({"source": "graph", "kind": t or "item"})
-            out.append(MemoryContent(content=content, mime_type=MemoryMimeType.TEXT, metadata=meta))
-        return out
-
-    async def clear(self) -> None:
-        try:
-            if self._thread.thread_id:
-                await self._client.thread.delete(thread_id=self._thread.thread_id)
-        except Exception as e:
-            self._logger.error(f"Error clearing Zep memory: {e}")
-            raise
-
-    async def close(self) -> None:
-        return None
-    
-    async def query(
-        self,
-        query: str | MemoryContent,
-        cancellation_token: CancellationToken | None = None,
-        **kwargs: Any,
-    ) -> MemoryQueryResult:
-        _ = cancellation_token
-
-        raw_limit = kwargs.pop("limit", 5)
-
-        # Union auflösen: Immer als string in search() geben
-        if isinstance(query, MemoryContent):
-            q_str = str(query.content)
-        else:
-            q_str = str(query)
-
-        contents = await self.search(q_str, k=raw_limit, **kwargs)
-        return MemoryQueryResult(results=contents)
-
-    async def update_context(self, model_context: ChatCompletionContext) -> UpdateContextResult:
-        try:
-            if not self._thread.thread_id:
-                return UpdateContextResult(memories=MemoryQueryResult(results=[]))
-            block = await self._thread.build_context_block(include_recent=True, recent_limit=10)
-            memory_contents = []
-            if block:
-                memory_contents.append(
-                    MemoryContent(
-                        content=block,
-                        mime_type=MemoryMimeType.TEXT,
-                        metadata={"source": "thread_context"},))
-                try:
-                    await model_context.add_message(SystemMessage(content=block))
-                except Exception as ie:
-                    self._logger.debug(f"Context injection skipped: {ie}")
-            return UpdateContextResult(memories=MemoryQueryResult(results=memory_contents))
-        except Exception as e:
-            self._logger.error(f"Error updating context with Zep memory: {e}")
-            return UpdateContextResult(memories=MemoryQueryResult(results=[]))
-
-    async def get_context(self,include_recent: bool = True,graph: bool = False,graph_filters: dict[str, Any] | None = None,recent_limit: int = 10,) -> str:
-        parts: list[str] = []
-        try:
-            if include_recent and self._thread:
-                block = await self._thread.build_context_block(
-                    include_recent=True, recent_limit=recent_limit)
-                if block:
-                    parts.append(block)
-        except Exception as e:
-            self._logger.debug(f"thread-context skipped: {e}")
-        if graph and not self._thread._is_local:
-            try:
-                params: dict[str, Any] = {"limit": 5}
-                if graph_filters:
-                    params.update(graph_filters)
-                api = self._get_api()
-                items: list[dict[str, Any]] = await api.search(query="*", **params)
-                lines: list[str] = []
-                # kompaktes Rendering direkt aus normalisierten Items
-                for it in items:
-                    c = str(it.get("content") or "").strip()
-                    if c:
-                        lines.append(f"- {c}")
-                if lines:
-                    parts.append("Memory graph (compact):\n" + "\n".join(lines))
-            except Exception as e:
-                self._logger.debug(f"graph-context skipped: {e}")
-        ctx = "\n\n".join([p for p in parts if p and p.strip()]) or ""
-        return ctx
 

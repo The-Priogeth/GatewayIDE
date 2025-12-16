@@ -1,366 +1,434 @@
 <!-- MainWindow.axaml -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="GatewayIDE.App.MainWindow"
-        x:Name="RootWindow"
-        mc:Ignorable="d"
-        Width="1280" Height="800"
-        Title="Gateway IDE">
+        Title="Gateway IDE"
+        Width="1280"
+        Height="800"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        ExtendClientAreaTitleBarHeightHint="30">
 
 
+  <!-- ✅ STYLES-Bereich -->
+  <Window.Styles>
+    <!-- Basisstil -->
+    <Style Selector="Button.rail">
+      <Setter Property="Width" Value="56"/>
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Opacity" Value="0.88"/>
+    </Style>
 
-  <!-- Root Grid: Topbar + Content -->
+    <!-- Hover -->
+    <Style Selector="Button.rail:pointerover">
+      <Setter Property="Opacity" Value="1"/>
+      <Setter Property="Background" Value="#32363d"/>
+    </Style>
+
+    <!-- Pressed -->
+    <Style Selector="Button.rail:pressed">
+      <Setter Property="Background" Value="#3a3f46"/>
+    </Style>
+
+    <!-- Checked (für ToggleButtons) -->
+    <Style Selector="ToggleButton.rail:checked">
+      <Setter Property="Background" Value="#3d4450"/>
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+  </Window.Styles>
+
+  <!-- ✅ Ressourcen optional -->
+  <Window.Resources>
+    <ResourceDictionary/>
+  </Window.Resources>
+
+  <!-- EIN Root-Element als Window.Content -->
   <Grid RowDefinitions="Auto,*">
 
-    <!-- Top bar with tabs -->
-    <Border Grid.Row="0" Background="#2b2f36" Height="44">
-      <Grid ColumnDefinitions="44,*,Auto,Auto,Auto,Auto,Auto" VerticalAlignment="Center">
-        <!-- Toggle chat -->
-        <Border Grid.Column="0" Background="Transparent" Margin="6">
-          <Button Content="≡"
-                  Command="{Binding ToggleChatCommand}"
-                  Background="Transparent"
-                  Foreground="#ddd"/>
+    <!-- HEADER (liegt in der echten Titelzeile) -->
+    <Border Grid.Row="0" Background="#2b2f36" Height="30">
+      <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+        <!-- Volle Drag-Zone über die gesamte linke Spalte -->
+        <Border Grid.Column="0"
+                Background="Transparent"
+                PointerPressed="TitleDragZone_PointerPressed"
+                >
+          <!-- deine Menü-Labels liegen IN der Drag-Zone -->
+          <StackPanel Orientation="Horizontal"
+                      Margin="12,0"
+                      Spacing="30"
+                      VerticalAlignment="Center">
+            <TextBlock Text="File"       Foreground="#ddd"/>
+            <TextBlock Text="Edit"       Foreground="#ddd"/>
+            <TextBlock Text="Selection"  Foreground="#ddd"/>
+            <TextBlock Text="View"       Foreground="#ddd"/>
+            <TextBlock Text="Settings"   Foreground="#ddd"/>
+          </StackPanel>
         </Border>
-
-        <TextBlock Grid.Column="1" Text=" " />
-
-        <!-- Tabs -->
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="6">
-          <Button Content="Dashboard" Command="{Binding SelectTabCommand}" CommandParameter="Dashboard"/>
-        </StackPanel>
-        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" Margin="6">
-          <Button Content="Docker" Command="{Binding SelectTabCommand}" CommandParameter="Docker"/>
-        </StackPanel>
-        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" Margin="6">
-          <Button Content="KI System" Command="{Binding SelectTabCommand}" CommandParameter="KI System"/>
-        </StackPanel>
-        <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="6" Margin="6">
-          <Button Content="Project" Command="{Binding SelectTabCommand}" CommandParameter="Project"/>
-        </StackPanel>
-        <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="6" Margin="6">
-          <Button Content="Blockchain" Command="{Binding SelectTabCommand}" CommandParameter="Blockchain"/>
-        </StackPanel>
+        <!-- Reservefläche für native Min/Max/Close (bei hohem DPI ggf. 160–180 setzen) -->
+        <Border Grid.Column="1" Width="180" Background="Transparent"/>
       </Grid>
     </Border>
 
-    <!-- Content area: Chat-Sidebar + Main -->
+    <!-- BODY -->
     <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+      <!-- LEFT RAIL (Icon-Sidepanel) -->
+      <Grid Width="56" Background="#2a2e35">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-      <!-- Chat Sidebar (nur KI-Dialog) -->
-      <Border Background="#3b3f46" Width="{Binding LeftPaneWidth}" MinWidth="0">
-        <Grid RowDefinitions="*,Auto" Margin="8">
+        <!-- TOP GROUP -->
+        <StackPanel Margin="0,6" Spacing="4">
+          <Button Classes="rail" ToolTip.Tip="Dashboard"
+                                 Command="{Binding ShowDashboardCommand}">   
+            <TextBlock Text="🏠" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Explorer">
+            <TextBlock Text="📁" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Search">
+            <TextBlock Text="🔎" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Source Control">
+            <TextBlock Text="🔱" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Run &amp; Debug">
+            <TextBlock Text="🧪" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Remote">
+            <TextBlock Text="🛰️" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Extensions">
+            <TextBlock Text="🧩" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Testing">
+            <TextBlock Text="✔️" FontSize="18" />
+          </Button>
+          <Button Classes="rail"
+                  ToolTip.Tip="Containers"
+                  Command="{Binding SelectTabCommand}"
+                  CommandParameter="Docker">
+            <TextBlock Text="🐳" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="CUE">
+            <TextBlock Text="⚙️" FontSize="18" />
+          </Button>
+          <Button Classes="rail" ToolTip.Tip="Resource Explorer">
+            <TextBlock Text="📦" FontSize="18" />
+          </Button>
+        </StackPanel>
 
-        <!-- Chat Panel (links) -->
-        <ListBox Grid.Row="0"
-                ItemsSource="{Binding ChatLines}"
-                SelectedIndex="{Binding ChatSelectedIndex}">
-          <ListBox.Styles>
-            <Style Selector="ListBoxItem">
-              <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            </Style>
-          </ListBox.Styles>
+        <!-- Spacer -->
+        <Border Grid.Row="1"/>
 
-          <ListBox.ItemTemplate>
-            <DataTemplate>
-              <!-- ReadOnly TextBox = selektier- & kopierbar -->
-              <TextBox Text="{Binding Text}"
-                      IsReadOnly="True"
-                      AcceptsReturn="True"
-                      TextWrapping="Wrap"
-                      BorderThickness="0"
-                      Background="Transparent"
-                      Foreground="{Binding Brush}"
-                      FontFamily="Consolas, Menlo, monospace"/>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
+        <!-- BOTTOM GROUP -->
+        <StackPanel Grid.Row="2" Margin="0,6" Spacing="4">
+          <Button Classes="rail" ToolTip.Tip="Blockchain">
+            <TextBlock Text="⛓" FontSize="18" />
+          </Button>
+          <Button Classes="rail"
+                  ToolTip.Tip="KI-System"
+                  Command="{Binding SelectTabCommand}"
+                  CommandParameter="KI System">
+            <TextBlock Text="🤖" FontSize="18" />
+          </Button>
+          <!-- Chat-Icon triggert dein ToggleChatCommand -->
+          <Button Classes="rail"
+                  ToolTip.Tip="Chat"
+                  Command="{Binding ToggleChatCommand}">
+            <TextBlock Text="💬" FontSize="18" />
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <!-- RIGHT SIDE: Chat-Sidepanel + Main-Workspace -->
+      <Grid Grid.Column="1" ColumnDefinitions="Auto,*" Background="#0f0f0f">
+
+        <!-- CHAT SIDEBAR (links im rechten Bereich) -->
+        <Border Grid.Column="0"
+                Background="#3b3f46"
+                Width="{Binding LeftPaneWidth}"
+                MinWidth="0">
+          <Grid>
+            <!-- CHAT-MODUS im Sidepanel -->
+            <Grid RowDefinitions="*,Auto"
+                  Margin="8"
+                  IsVisible="{Binding IsSidePanelShowingChat}">
+
+              <!-- Chat-Verlauf -->
+              <ListBox Grid.Row="0"
+                       ItemsSource="{Binding ChatLines}"
+                       SelectedIndex="{Binding ChatSelectedIndex}">
+                <ListBox.Styles>
+                  <Style Selector="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                  </Style>
+                </ListBox.Styles>
+
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBox Text="{Binding Text}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="{Binding Brush}"
+                             FontFamily="Consolas, Menlo, monospace"/>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+
+              <!-- Chat-Eingabe -->
+              <TextBox x:Name="ChatInputBox"
+                       Grid.Row="1"
+                       Margin="0,6,0,0"
+                       Watermark="Chat Nachricht…"
+                       Text="{Binding ChatInput, Mode=TwoWay}">
+                <TextBox.KeyBindings>
+                  <KeyBinding Gesture="Enter"
+                              Command="{Binding SendChatCommand}" />
+                </TextBox.KeyBindings>
+              </TextBox>
+            </Grid>
+
+            <!-- DASHBOARD-MODUS im Sidepanel -->
+            <Grid Margin="8"
+                  IsVisible="{Binding IsSidePanelShowingDashboard}">
+              <Border Padding="8"
+                      Background="#2b2f36"
+                      CornerRadius="8">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Dashboard"
+                             FontWeight="Bold"
+                             Margin="0,0,0,4"/>
+
+                  <TextBlock Text="Docker Desktop:"
+                             FontSize="11"/>
+                  <TextBlock Text="{Binding DockerDesktopStatus}"
+                             Foreground="{Binding DockerDesktopStatusBrush}"
+                             FontSize="11"/>
+
+                  <TextBlock Text="Image:"
+                             Margin="0,4,0,0"
+                             FontSize="11"/>
+                  <TextBlock Text="{Binding DockerImageStatus}"
+                             Foreground="{Binding DockerImageStatusBrush}"
+                             FontSize="11"/>
+
+                  <TextBlock Text="Container:"
+                             Margin="0,4,0,0"
+                             FontSize="11"/>
+                  <TextBlock Text="{Binding DockerContainerStatus}"
+                             Foreground="{Binding DockerContainerStatusBrush}"
+                             FontSize="11"/>
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Grid>
+        </Border>
+
+        <!-- MAIN WORKSPACE (rechts) -->
+        <Grid Grid.Column="1">
+          <Grid RowDefinitions="Auto,*">
+
+            <!-- MAIN CONTENT -->
+            <Grid Grid.Row="1">
 
 
-          <!-- Chat-Eingabe -->
-          <TextBox x:Name="ChatInputBox"
-                  Grid.Row="1"
-                  Margin="0,6,0,0"
-                  Watermark="Chat Nachricht…"
-                  Text="{Binding ChatInput, Mode=TwoWay}">
-            <TextBox.KeyBindings>
-              <KeyBinding Gesture="Enter"
-                          Command="{Binding SendChatCommand}" />
-            </TextBox.KeyBindings>
-          </TextBox>
+              <!-- DOCKER -->
+              <Grid IsVisible="{Binding IsDocker}" Margin="8" ClipToBounds="True">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="*"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        </Grid>
-      </Border>
+                <!-- Toolbar -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                  <Button Content="Rebuild (wipe + build)" Command="{Binding RebuildGatewayCommand}" />
+                  <Button Content="Start (up)"             Command="{Binding StartGatewayCommand}" />
+                  <Button Content="Stop (down)"            Command="{Binding StopGatewayCommand}" />
+                  <Button Content="Remove container"       Command="{Binding RemoveGatewayContainerCommand}" />
+                  <Button Content="Clear Logs"             Command="{Binding ClearAllLogsCommand}" />
 
+                  <Separator Width="16"/>
 
+                  <Button Content="{Binding ExpandLabel}" Command="{Binding ExpandGatewayOnlyCommand}" />
+                </StackPanel>
 
-      <!-- Main workspace -->
-      <Grid Grid.Column="1">
+                <!-- Oberes Grid -->
+                <Grid Grid.Row="1" ClipToBounds="True">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="{Binding TopSmallRowHeight}"/>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
 
-        <!-- DASHBOARD: oben (Buttons + Status ⇢ 75%/25%), unten Terminal -->
-        <Grid RowDefinitions="2*,*"
-              IsVisible="{Binding IsDashboard}">
+                  <!-- oben links -->
+                  <Border Grid.Row="0" Grid.Column="0"
+                          BorderBrush="#444" BorderThickness="1" Margin="4"
+                          VerticalAlignment="Stretch">
+                    <TextBox x:Name="DockerOutBox"
+                            Text="{Binding DockerOutBuffer}"
+                            CaretIndex="{Binding DockerOutCaret}"
+                            TextWrapping="Wrap"
+                            FontFamily="Consolas, Menlo, monospace"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            Background="#0b0b0b"
+                            Foreground="#d8d8d8"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch" MinHeight="0"/>
+                  </Border>
 
-          <!-- OBERER TEIL: Buttons (links, 75%) + Status (rechts, 25%) -->
-          <Grid Grid.Row="0" ColumnDefinitions="3*,1*">
-            <!-- Buttons links -->
-            <ScrollViewer Grid.Column="0">
-              <WrapPanel Margin="12" ItemHeight="40" ItemWidth="180">
-                <Button Content="Start Mega-Node" Command="{Binding StartMeganodeCommand}" />
-              </WrapPanel>
-            </ScrollViewer>
+                  <!-- oben rechts -->
+                  <Border Grid.Row="0" Grid.Column="1"
+                          BorderBrush="#444" BorderThickness="1" Margin="4"
+                          VerticalAlignment="Stretch">
+                    <TextBox x:Name="DockerErrBox"
+                            Text="{Binding DockerErrBuffer}"
+                            CaretIndex="{Binding DockerErrCaret}"
+                            TextWrapping="Wrap"
+                            FontFamily="Consolas, Menlo, monospace"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            Background="#0b0b0b"
+                            Foreground="#d8d8d8"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            VerticalAlignment="Stretch" MinHeight="0"/>
+                  </Border>
 
-            <!-- System Status rechts (nimmt 25%) -->
-            <Border Grid.Column="1"
-                    Margin="12,0,12,8"
-                    Padding="12"
-                    Background="#222"
-                    HorizontalAlignment="Right"
-                    CornerRadius="8">
-              <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-                <TextBlock Grid.ColumnSpan="2"
-                          Text="System Status"
-                          FontWeight="Bold"
-                          Margin="0,0,0,8"/>
+                  <!-- unten (vollbreit) -->
+                  <Border Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="GatewayLogBox"
+                            Text="{Binding GatewayLogBuffer}"
+                            CaretIndex="{Binding GatewayLogCaret}"
+                            TextWrapping="Wrap"
+                            FontFamily="Consolas, Menlo, monospace"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            Background="#0b0b0b"
+                            Foreground="#d8d8d8"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
+                </Grid>
 
-                <!-- NEU: Docker Desktop -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Docker Desktop:" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="1" Grid.Column="1"
-                          Text="{Binding DockerDesktopStatus}"
-                          Foreground="{Binding DockerDesktopStatusBrush}"/>
+                <!-- Unteres Grid -->
+                <Grid Grid.Row="2" RowDefinitions="*,Auto" ClipToBounds="True">
+                  <!-- Output -->
+                  <Border Grid.Row="0" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="ContainerIOBox"
+                            Text="{Binding ContainerIOBuffer}"
+                            CaretIndex="{Binding ContainerIOCaret}"
+                            TextWrapping="Wrap"
+                            FontFamily="Consolas, Menlo, monospace"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            Background="#0b0b0b"
+                            Foreground="#d8d8d8"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
 
-                <!-- Image -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Docker Image Status:" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="2" Grid.Column="1"
-                          Text="{Binding DockerImageStatus}"
-                          Foreground="{Binding DockerImageStatusBrush}"/>
-
-                <!-- Container -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Docker Container:" Margin="0,0,8,0"/>
-                <TextBlock Grid.Row="3" Grid.Column="1"
-                          Text="{Binding DockerContainerStatus}"
-                          Foreground="{Binding DockerContainerStatusBrush}"/>
+                  <!-- Input -->
+                  <TextBox x:Name="ContainerCmdBox"
+                          Grid.Row="1"
+                          Margin="4,8,4,4"
+                          AcceptsReturn="True"
+                          MaxHeight="200"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          Watermark="Befehl im Container ausführen (z. B. pip list)"
+                          Text="{Binding ContainerCommand, Mode=TwoWay}">
+                    <TextBox.KeyBindings>
+                      <KeyBinding Gesture="Enter"
+                                  Command="{Binding ExecuteInContainerCommand}"
+                                  CommandParameter="{Binding Text, ElementName=ContainerCmdBox}" />
+                    </TextBox.KeyBindings>
+                  </TextBox>
+                </Grid>
               </Grid>
 
-            </Border>
-          </Grid>
+              <!-- KI-SYSTEM -->
+              <Grid IsVisible="{Binding IsKiSystem}"
+                    ColumnDefinitions="3*,*"
+                    RowDefinitions="3*,*"
+                    Margin="8">
+                <!-- 2x2 Thread-Board links -->
+                <Grid Grid.Column="0" Grid.Row="0"
+                      RowDefinitions="*,*"
+                      ColumnDefinitions="*,*">
+                  <Border Grid.Row="0" Grid.Column="0" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="T2Box"
+                            Text="{Binding T2Buffer}"
+                            CaretIndex="{Binding T2Caret}"
+                            FontFamily="Consolas, Menlo, monospace"
+                            Background="#0b0b0b" Foreground="#d8d8d8"
+                            AcceptsReturn="True" IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
+                  <Border Grid.Row="0" Grid.Column="1" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="T4Box"
+                            Text="{Binding T4Buffer}"
+                            CaretIndex="{Binding T4Caret}"
+                            FontFamily="Consolas, Menlo, monospace"
+                            Background="#0b0b0b" Foreground="#d8d8d8"
+                            AcceptsReturn="True" IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
+                  <Border Grid.Row="1" Grid.Column="0" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="T5Box"
+                            Text="{Binding T5Buffer}"
+                            CaretIndex="{Binding T5Caret}"
+                            FontFamily="Consolas, Menlo, monospace"
+                            Background="#0b0b0b" Foreground="#d8d8d8"
+                            AcceptsReturn="True" IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
+                  <Border Grid.Row="1" Grid.Column="1" BorderBrush="#444" BorderThickness="1" Margin="4">
+                    <TextBox x:Name="T6Box"
+                            Text="{Binding T6Buffer}"
+                            CaretIndex="{Binding T6Caret}"
+                            FontFamily="Consolas, Menlo, monospace"
+                            Background="#0b0b0b" Foreground="#d8d8d8"
+                            AcceptsReturn="True" IsReadOnly="True"
+                            TextWrapping="Wrap"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                  </Border>
+                </Grid>
 
-          <!-- Terminal unten -->
-          <Border Grid.Row="1" Margin="8" BorderBrush="#7a29ff" BorderThickness="2">
-            <TextBox Text="{Binding TerminalBuffer}"
-                    TextWrapping="Wrap"
-                    FontFamily="Consolas, Menlo, monospace"
-                    IsReadOnly="True"
-                    AcceptsReturn="True"
-                    Background="#0b0b0b"
-                    Foreground="#d8d8d8"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-          </Border>
-        </Grid>
-        
-        <!-- -->
-        <!-- DOCKER: Toolbar + obere Hälfte (2x50% + 100%) + untere Hälfte (Output|Input) -->
-        <Grid IsVisible="{Binding IsDocker}" Margin="8" ClipToBounds="True">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>  <!-- Toolbar -->
-            <RowDefinition Height="*"/>     <!-- OBERES GRID -->
-            <RowDefinition Height="*"/>     <!-- UNTERES GRID -->
-          </Grid.RowDefinitions>
+                <!-- Rechte Spalte: Platzhalter -->
+                <Grid Grid.Column="1" Grid.RowSpan="2" RowDefinitions="*,*,*" Margin="4,0,0,0">
+                  <Border Grid.Row="0" BorderBrush="#333" BorderThickness="1" Margin="4"/>
+                  <Border Grid.Row="1" BorderBrush="#333" BorderThickness="1" Margin="4"/>
+                  <Border Grid.Row="2" BorderBrush="#333" BorderThickness="1" Margin="4"/>
+                </Grid>
 
-          <!-- Toolbar -->
-          <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
-            <Button Content="Rebuild (wipe + build)" Command="{Binding RebuildGatewayCommand}" />
-            <Button Content="Start (up)"             Command="{Binding StartGatewayCommand}" />
-            <Button Content="Stop (down)"            Command="{Binding StopGatewayCommand}" />
-            <Button Content="Remove container"       Command="{Binding RemoveGatewayContainerCommand}" />
-            <Button Content="Clear Logs"             Command="{Binding ClearAllLogsCommand}" />
+                <!-- Unteres Fenster links -->
+                <Border Grid.Column="0" Grid.Row="1" BorderBrush="#444" BorderThickness="1" Margin="4">
+                  <!-- Platzhalter -->
+                </Border>
+              </Grid>
 
-            <Separator Width="16"/>
+            </Grid> <!-- MAIN CONTENT -->
+          </Grid>   <!-- Row 0 Tabs + Row 1 Content -->
+        </Grid>     <!-- MAIN WORKSPACE -->
+      </Grid>       <!-- RIGHT SIDE -->
+    </Grid>         <!-- BODY -->
 
-            <Button Content="{Binding ExpandLabel}" Command="{Binding ExpandGatewayOnlyCommand}" />
-          </StackPanel>
-
-
-          <!-- OBERES GRID -->
-          <Grid Grid.Row="1" ClipToBounds="True">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="{Binding TopSmallRowHeight}"/>  <!-- Auto ↔ 0 -->
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- oben links -->
-            <Border Grid.Row="0" Grid.Column="0"
-                    BorderBrush="#444" BorderThickness="1" Margin="4"
-                    VerticalAlignment="Stretch">
-              <TextBox x:Name="DockerOutBox"
-                      Text="{Binding DockerOutBuffer}"
-                      CaretIndex="{Binding DockerOutCaret}"
-                      TextWrapping="Wrap"
-                      FontFamily="Consolas, Menlo, monospace"
-                      IsReadOnly="True"
-                      AcceptsReturn="True"
-                      Background="#0b0b0b"
-                      Foreground="#d8d8d8"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      VerticalAlignment="Stretch" MinHeight="0"/>
-            </Border>
-
-            <!-- oben rechts -->
-            <Border Grid.Row="0" Grid.Column="1"
-                    BorderBrush="#444" BorderThickness="1" Margin="4"
-                    VerticalAlignment="Stretch">
-              <TextBox x:Name="DockerErrBox"
-                      Text="{Binding DockerErrBuffer}"
-                      CaretIndex="{Binding DockerErrCaret}"
-                      TextWrapping="Wrap"
-                      FontFamily="Consolas, Menlo, monospace"
-                      IsReadOnly="True"
-                      AcceptsReturn="True"
-                      Background="#0b0b0b"
-                      Foreground="#d8d8d8"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      VerticalAlignment="Stretch" MinHeight="0"/>
-            </Border>
-
-            <!-- unten (vollbreit) -->
-            <Border Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="GatewayLogBox"
-                      Text="{Binding GatewayLogBuffer}"
-                      CaretIndex="{Binding GatewayLogCaret}"
-                      TextWrapping="Wrap"
-                      FontFamily="Consolas, Menlo, monospace"
-                      IsReadOnly="True"
-                      AcceptsReturn="True"
-                      Background="#0b0b0b"
-                      Foreground="#d8d8d8"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-          </Grid>
-
-
-
-          <!-- UNTERES GRID (50% der Fläche): Ausgabe oben, Eingabe unten -->
-          <Grid Grid.Row="2" RowDefinitions="*,Auto" ClipToBounds="True">
-
-            <!-- Output -->
-            <Border Grid.Row="0" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="ContainerIOBox"
-                      Text="{Binding ContainerIOBuffer}"
-                      CaretIndex="{Binding ContainerIOCaret}"
-                      TextWrapping="Wrap"
-                      FontFamily="Consolas, Menlo, monospace"
-                      IsReadOnly="True"
-                      AcceptsReturn="True"
-                      Background="#0b0b0b"
-                      Foreground="#d8d8d8"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-
-            <!-- Input (mehrzeilig, fix begrenzt) -->
-            <TextBox x:Name="ContainerCmdBox"
-                    Grid.Row="1"
-                    Margin="4,8,4,4"
-                    AcceptsReturn="True"
-                    MaxHeight="200"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    Watermark="Befehl im Container ausführen (z. B. pip list)"
-                    Text="{Binding ContainerCommand, Mode=TwoWay}">
-              <TextBox.KeyBindings>
-                <KeyBinding Gesture="Enter"
-                            Command="{Binding ExecuteInContainerCommand}"
-                            CommandParameter="{Binding Text, ElementName=ContainerCmdBox}" />
-              </TextBox.KeyBindings>
-            </TextBox>
-          </Grid>
-
-        </Grid>
-
-
-
-
-        <!-- KI-System Tab -->
-        <Grid IsVisible="{Binding IsKiSystem}"
-              ColumnDefinitions="3*,*"
-              RowDefinitions="3*,*"
-              Margin="8">
-
-          <!-- Linke Seite (75% Breite, oben 75% Höhe: 2x2 Thread-Board) -->
-          <Grid Grid.Column="0" Grid.Row="0" RowDefinitions="*,*" ColumnDefinitions="*,*" >
-
-            <!-- T2 -->
-            <Border Grid.Row="0" Grid.Column="0" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="T2Box"
-                      Text="{Binding T2Buffer}"
-                      CaretIndex="{Binding T2Caret}"
-                      FontFamily="Consolas, Menlo, monospace"
-                      Background="#0b0b0b" Foreground="#d8d8d8"
-                      AcceptsReturn="True" IsReadOnly="True"
-                      TextWrapping="Wrap"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-
-            <!-- T4 -->
-            <Border Grid.Row="0" Grid.Column="1" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="T4Box"
-                      Text="{Binding T4Buffer}"
-                      CaretIndex="{Binding T4Caret}"
-                      FontFamily="Consolas, Menlo, monospace"
-                      Background="#0b0b0b" Foreground="#d8d8d8"
-                      AcceptsReturn="True" IsReadOnly="True"
-                      TextWrapping="Wrap"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-
-            <!-- T5 -->
-            <Border Grid.Row="1" Grid.Column="0" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="T5Box"
-                      Text="{Binding T5Buffer}"
-                      CaretIndex="{Binding T5Caret}"
-                      FontFamily="Consolas, Menlo, monospace"
-                      Background="#0b0b0b" Foreground="#d8d8d8"
-                      AcceptsReturn="True" IsReadOnly="True"
-                      TextWrapping="Wrap"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-
-            <!-- T6 -->
-            <Border Grid.Row="1" Grid.Column="1" BorderBrush="#444" BorderThickness="1" Margin="4">
-              <TextBox x:Name="T6Box"
-                      Text="{Binding T6Buffer}"
-                      CaretIndex="{Binding T6Caret}"
-                      FontFamily="Consolas, Menlo, monospace"
-                      Background="#0b0b0b" Foreground="#d8d8d8"
-                      AcceptsReturn="True" IsReadOnly="True"
-                      TextWrapping="Wrap"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            </Border>
-          </Grid>
-
-          <!-- Rechte Seite (25% Breite, volle Höhe → 1x3 leer) -->
-          <Grid Grid.Column="1" Grid.RowSpan="2" RowDefinitions="*,*,*" Margin="4,0,0,0">
-            <Border Grid.Row="0" BorderBrush="#333" BorderThickness="1" Margin="4"/>
-            <Border Grid.Row="1" BorderBrush="#333" BorderThickness="1" Margin="4"/>
-            <Border Grid.Row="2" BorderBrush="#333" BorderThickness="1" Margin="4"/>
-          </Grid>
-
-          <!-- Unteres Fenster links (25% Höhe × 75% Breite) -->
-          <Border Grid.Column="0" Grid.Row="1" BorderBrush="#444" BorderThickness="1" Margin="4">
-            <!-- leer: Platzhalter -->
-          </Border>
-        </Grid>
-
-
-
-      </Grid>
-    </Grid>
 
   </Grid>
 </Window>
-
-    

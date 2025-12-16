@@ -1,7 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
-from autogen_core.memory import MemoryContent, MemoryMimeType
+from backend.agent_core.messaging import Message, Envelope, UserProxy
 
 router = APIRouter()
 
@@ -12,21 +12,26 @@ class ChatRequest(BaseModel):
 async def chat(req: ChatRequest, request: Request):
     rt = request.app.state.runtime
     t1_mem = rt.t1_memory
-    ctxprov = rt.ctx_provider
     hma = rt.hma
 
-    # 1) Prompt -> T1
-    await t1_mem.add(MemoryContent(
-        content=req.prompt,
-        mime_type=MemoryMimeType.TEXT,
-        metadata={"type":"message","role":"user","name":"User","thread":"T1"},
-    ))
+    # UserProxy – in Zukunft gerne im Runtime-Bootstrap zentral instanzieren.
+    user_proxy = getattr(rt, "user_proxy", None)
+    if user_proxy is None:
+        user_proxy = UserProxy(hma=hma, t1_memory=t1_mem, messaging=getattr(rt, "messaging", None))
 
-    # 2) Kontext
-    if hasattr(ctxprov, "refresh"):
-        await ctxprov.refresh()
-    ctx = ctxprov.get() if hasattr(ctxprov, "get") else None
+    # 1) Request → Envelope (Thread T1, Rolle "user")
+    msg = Message(
+        role="user",
+        text=req.prompt,
+        meta=None,
+        deliver_to=None,
+    )
+    env = Envelope(
+        thread="T1",
+        message=msg,
+        attachments=None,  # später: Dateien/Bilder aus dem Request befüllen
+    )
 
-    # 3) HMA-Zyklus → Envelope (Speaker ist intern)
-    envelope = await hma.run_inner_cycle(req.prompt, ctx)
-    return envelope
+    # 2) UserProxy verarbeitet das Envelope und delegiert an HMA
+    result = await user_proxy.handle(env)
+    return result

@@ -16,6 +16,24 @@ class Message:
 class Envelope:
     thread: str   # "T1"..."T6"
     message: Message
+    # Optionale Anhänge (Bilder, Dateien, Blob-IDs, etc.)
+    # Konkrete Struktur später definieren (z. B. {"type": "...", "id": "..."}).
+    attachments: list[Any] | None = None
+
+
+@dataclass
+class Address:
+    """
+    Abstrakte Adressierung für Agenten-Kommunikation.
+
+    origin: Wer sendet? z. B. "HMA", "TASK", "LIB", "TRN", ...
+    target: Wohin?      z. B. "user", "task", "lib", "trn"
+
+    Die konkrete Übersetzung (Thread-Mapping, Envelope-Routing)
+    erfolgt agent-/kontextspezifisch und NICHT hier.
+    """
+    origin: str
+    target: str
 
 def log(msg: str, scope: str = "sys") -> None:
     # Zentraler Logger (kann an loguru/structlog gebunden werden)
@@ -47,45 +65,49 @@ def snapshot(text: str, *, to: str = "user", corr_id: str | None = None, dirpath
         pass
     return path
 
+
+
 # ---------------------------------------------------------------------
-# T2 Persistenz (Slim, async)
+# UserProxy – dünne Hülle um HMA für /chat
 # ---------------------------------------------------------------------
-import asyncio
 
-async def log_som_internal_t2(
-    *, t2_memory, aggregate: str, ich_text: str, corr_id: str | None = None
-) -> bool:
+class UserProxy:
     """
-    Speichert den internen SOM-Zwischenstand (aggregate + ich_text) in Thread T2.
-    Erwartet ein ZepUserMemory-Objekt als t2_memory.
+    Nimmt ein Envelope aus der Chat-API entgegen und kümmert sich darum,
+    die User-Nachricht in T1 zu persistieren und den HMA auszuführen.
+
+    Später kann diese Klasse erweitert werden (z. B. Envelope-Routing,
+    Multi-Thread-Support, Dateien/Bilder behandeln, etc.).
     """
-    if not t2_memory:
-        print("[Messaging:T2] Kein t2_memory übergeben – übersprungen.")
-        return False
 
-    from autogen_core.memory import MemoryContent, MemoryMimeType
+    def __init__(self, *, hma: Any, t1_memory: Any, messaging: Any | None = None) -> None:
+        self._hma = hma
+        self._t1 = t1_memory
+        self._msg = messaging
 
-    content = (
-        f"# Interner Zwischenstand\n{aggregate}\n\n"
-        f"# Ich-Antwort (Roh)\n{ich_text.strip()}"
-    )
+    async def handle(self, envelope: Envelope) -> dict[str, Any]:
+        """
+        Aktuelles Verhalten:
+        - erwartet eine User-Nachricht (thread "T1")
+        - persistiert sie in T1
+        - ruft HMA.run(user_text=...) auf
+        - gibt das HMA-Ergebnis unverändert zurück
+        """
+        # Safety: nur T1 für direkten User-Dialog (später erweiterbar)
+        thread = envelope.thread or "T1"
+        msg = envelope.message
 
-    try:
-        await t2_memory.add(
-            MemoryContent(
-                content=content,
-                mime_type=MemoryMimeType.TEXT,
-                metadata={
-                    "type": "message",
-                    "role": "system",
-                    "name": "SOM:inner",
-                    "thread": "T2",
-                    "corr_id": corr_id or "no-id",
-                },
+        # 1) User-Prompt in T1 persistieren (so wie bisher direkt in chat_api)
+        if self._t1 is not None and msg and msg.text:
+            from autogen_core.memory import MemoryContent, MemoryMimeType
+            await self._t1.add(
+                MemoryContent(
+                    content=msg.text,
+                    mime_type=MemoryMimeType.TEXT,
+                    metadata={"type": "message", "role": msg.role, "name": "User", "thread": thread},
+                )
             )
-        )
-        print("[Messaging:T2] Persist-OK.")
-        return True
-    except Exception as e:
-        print(f"[Messaging:T2] Persist-Fehler: {e}")
-        return False
+
+        # 2) HMA kümmert sich um alles Weitere (Kontext, Speaker, Routing)
+        result = await self._hma.run(user_text=msg.text, context="")
+        return result

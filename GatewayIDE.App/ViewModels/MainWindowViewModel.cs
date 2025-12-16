@@ -12,6 +12,9 @@ using Avalonia.Controls;
 
 namespace GatewayIDE.App.ViewModels;
 
+
+
+
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
     #region ===== INotifyPropertyChanged =====
@@ -20,10 +23,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     #endregion
 
+
     // ---------------------------------------------------------------------------------------------
     //  Tabs & Sichtbarkeiten
     // ---------------------------------------------------------------------------------------------
     #region ===== Tabs & Sichtbarkeit =====
+    
     private string _activeTab = "Dashboard";
     public string ActiveTab
     {
@@ -44,13 +49,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public bool IsDashboard => ActiveTab == TAB_DASH;
     public bool IsDocker    => ActiveTab == TAB_DOCK;
-    public bool IsKiSystem  => ActiveTab == TAB_KI;
+    public bool IsKiSystem => ActiveTab == TAB_KI;
     #endregion
 
     // ---------------------------------------------------------------------------------------------
     //  Chat-Bereich (linke Seitenleiste)
     // ---------------------------------------------------------------------------------------------
     #region ===== Chat (Sidebar) =====
+
     public ObservableCollection<ChatLine> ChatLines { get; } = new();
 
     private double _leftPaneWidth = 260;
@@ -76,6 +82,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         set { _chatSelectedIndex = value; Raise(); }
     }
     private int _chatSelectedIndex = -1;
+
+
+    // Sidepanel-Mode: Chat vs. Dashboard
+    private bool _isSidePanelShowingChat = true;
+    public bool IsSidePanelShowingChat
+    {
+        get => _isSidePanelShowingChat;
+        set
+        {
+            if (_isSidePanelShowingChat == value) return;
+            _isSidePanelShowingChat = value;
+            Raise();
+            Raise(nameof(IsSidePanelShowingDashboard));
+        }
+    }
+
+    // Dashboard-Modus ist einfach das Gegenteil
+    public bool IsSidePanelShowingDashboard => !IsSidePanelShowingChat;
+
 
     public sealed class ChatLine
     {
@@ -333,6 +358,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     // UI-Navigation / Chat
     public ICommand ToggleChatCommand { get; }
+    public ICommand ShowDashboardCommand { get; }
     public ICommand SelectTabCommand { get; }
     public ICommand SendChatCommand { get; }
 
@@ -409,16 +435,67 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
 
         // --- UI-Navigation + Chat ---
-        ToggleChatCommand = new DelegateCommand(_ =>
-            LeftPaneWidth = LeftPaneWidth > 0 ? 0 : 260);
 
+        // Chat-Toggle mit 3 Zuständen:
+        // 1) Sidepanel zu         → Klick: auf + Chat
+        // 2) Sidepanel offen+Dash → Klick: Chat
+        // 3) Sidepanel offen+Chat → Klick: zu
+        ToggleChatCommand = new DelegateCommand(_ =>
+        {
+            // 1) Sidepanel ist zu → öffnen + Chat anzeigen
+            if (LeftPaneWidth <= 0)
+            {
+                LeftPaneWidth = 260;
+                IsSidePanelShowingChat = true;
+                return;
+            }
+
+            // 2) Sidepanel ist offen, zeigt aber Dashboard → auf Chat umschalten
+            if (!IsSidePanelShowingChat)
+            {
+                IsSidePanelShowingChat = true;
+                return;
+            }
+
+            // 3) Sidepanel ist offen und zeigt Chat → schließen
+            LeftPaneWidth = 0;
+        });
+
+        // Dashboard über linken 🏠-Button
+        ShowDashboardCommand = new DelegateCommand(_ =>
+        {
+            AppendTerm("[SIDE] Dashboard (via Rail)");
+
+            // 1) Sidepanel ist zu → öffnen + Dashboard anzeigen
+            if (LeftPaneWidth <= 0)
+            {
+                LeftPaneWidth = 260;
+                IsSidePanelShowingChat = false;
+                return;
+            }
+
+            // 2) Sidepanel ist offen, zeigt Chat → auf Dashboard umschalten
+            if (IsSidePanelShowingChat)
+            {
+                IsSidePanelShowingChat = false;
+                return;
+            }
+
+            // 3) Sidepanel ist offen und zeigt Dashboard → schließen
+            LeftPaneWidth = 0;
+        });
+
+        // Tabs steuern NUR die Mitte (Docker / KI / Project / Blockchain)
         SelectTabCommand = new DelegateCommand(async p =>
         {
             ActiveTab = p?.ToString() ?? "Dashboard";
             AppendTerm($"[TAB] {ActiveTab}");
-            if (IsDashboard) await RefreshSystemStatusAsync();
+
+            if (IsDashboard)
+                await RefreshSystemStatusAsync();
         });
 
+        // Chat-Senden wie gehabt
         SendChatCommand = new DelegateCommand(async _ =>
         {
             var text = (ChatInput ?? "").Trim();
@@ -432,6 +509,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ChatInput = string.Empty;
             await SendPromptAsync(sendText);
         });
+
 
         // --- Docker Commands ---
         RebuildGatewayCommand         = new DelegateCommand(async _ => await FullRebuildAsync());

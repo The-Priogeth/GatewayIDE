@@ -14,7 +14,19 @@ class MemoryManager:
     """
     def __init__(self, zep_memory: ZepMemory, get_api: GetAPI) -> None:
         self.mem = zep_memory
-        self._get_api = get_api  # zentrale Quelle für Graph-Operationen
+        self._get_api = get_api
+        self._reset_after: Optional[float] = None  # Zeitstempel als Epoch-Seconds
+
+    def start_new_chat(self, new_thread: bool = False) -> None:
+        if hasattr(self.mem, "start_new_chat"):
+            self.mem.start_new_chat(new_thread=new_thread)
+
+    def reset_context(self):
+        """
+        Soft-Reset: Nur Episoden nach diesem Moment werden in get_context() berücksichtigt.
+        """
+        import time
+        self._reset_after = time.time()
 
     async def add_message(self, role: str, text: str, name: Optional[str] = None,
                           also_graph: bool = False,
@@ -42,12 +54,35 @@ class MemoryManager:
         recent_limit: int = 10,
         graph_filters: dict | None = None,
     ) -> str:
-        return await self.mem.get_context(
+        ctx = await self.mem.get_context(
             include_recent=include_recent,
             graph=graph,
             recent_limit=recent_limit,
             graph_filters=graph_filters,
         )
+
+        # Filter: wenn reset_after gesetzt ist → alte Episoden entfernen
+        if self._reset_after:
+            import re
+            import time
+
+            cutoff = self._reset_after
+            blocks = re.split(r"\n(?=# )", ctx.strip())
+            fresh_blocks = []
+            for block in blocks:
+                m = re.search(r'"created_at":\s*"(.*?)"', block)
+                if not m:
+                    fresh_blocks.append(block)
+                    continue
+                try:
+                    ts = m.group(1)
+                    epoch = time.mktime(time.strptime(ts[:19], "%Y-%m-%dT%H:%M:%S"))
+                    if epoch >= cutoff:
+                        fresh_blocks.append(block)
+                except Exception:
+                    fresh_blocks.append(block)
+            return "\n".join(fresh_blocks).strip()
+        return ctx
 
     async def search(self, query: str, **kwargs):
         return await self.mem.query(query, **kwargs)
