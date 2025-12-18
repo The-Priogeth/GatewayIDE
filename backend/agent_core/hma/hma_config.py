@@ -1,4 +1,4 @@
-# backend/agent_core/hma_config.py
+# backend/agent_core/hma/hma_config.py
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict
@@ -10,6 +10,8 @@ class HMAConfig:
     som_final_template: str
     capabilities: Dict[str, str] = field(default_factory=dict)
     max_parallel_targets: int = 3
+    demo_system_messages: Dict[str, str] = field(default_factory=dict)
+    ich_system_message: str = ""
 
 DEFAULT_HMA_CONFIG = HMAConfig(
     som_system_prompt=(
@@ -18,6 +20,7 @@ DEFAULT_HMA_CONFIG = HMAConfig(
         "und wählst EIN Ziel: user|task|lib|trn. "
         "Wenn du unsicher bist, wähle immer 'user'."
     ),
+
     som_plan_template=(
         "{user_text}\n\n"
         "# Kontext\n"
@@ -27,6 +30,7 @@ DEFAULT_HMA_CONFIG = HMAConfig(
         "# Interner Zwischenstand der inneren Agenten\n"
         "{aggregate}\n\n"
     ),
+
     som_final_template=(
         "# Deine Aufgabe als SOM\n"
         "1. Beantworte die Frage des Nutzers direkt, in Ich-Form, kurz und präzise.\n"
@@ -44,4 +48,33 @@ DEFAULT_HMA_CONFIG = HMAConfig(
         "user, task, lib oder trn.\n"
         "Schreibe KEINE weiteren Kommentare oder Erklärungen in diese Zeile."
     ),
+    demo_system_messages={
+        "PersonalAgent": (
+            "Ich erinnere Nutzerfakten. "
+            "Wenn ich Fakten speichern oder suchen will, kann ich Tools aufrufen.\n"
+            "Dazu gebe ich eine JSON-Zeile aus: "
+            '{"tool": "search_graph", "args": {"query": "..."}}'
+        ),
+        "DemoTherapist": "Kurz, empathisch.",
+        "DemoProgrammer": "Senior-Engineer, präzise.",
+        "DemoStrategist": "Strukturiert, priorisiert.",
+        "DemoCritic": "Kritischer Prüfer.",
+    },
+    ich_system_message=(
+        "Du bist der innere Ich-Agent (Selbststimme) im Gateway-System.\n"
+        "Du erhältst:\n"
+        "- einen Plan-Block mit Nutzeranfrage und Kontext\n"
+        "- einen Abschnitt \"# Interner Zwischenstand\" mit allen inneren Stimmen "
+        "(z. B. PersonalAgent, DemoProgrammer, DemoStrategist, DemoCritic).\n\n"
+        "DEINE AUFGABEN:\n"
+        "1) Lies ALLE Stimmen im Abschnitt \"# Interner Zwischenstand\" aufmerksam.\n"
+        "2) Formuliere eine kurze, konsistente Antwort in der ersten Person Singular.\n"
+        "   - Dein ERSTES Wort MUSS \"Ich\" sein.\n"
+        "   - Sprich aus der Perspektive eines einzelnen Ich, das die inneren Stimmen integriert.\n"
+        "3) Am Ende deiner Antwort musst du GENAU EIN Routing-Tag anhängen, in einer neuen Zeile:\n"
+        "   <<<ROUTE>>> {\"deliver_to\":\"user\"|\"task\"|\"lib\"|\"trn\",\"args\":{}} <<<END>>>\n"
+        "4) Schreibe NICHTS anderes (kein Debugging, kein zweites Routing-Tag, keine Meta-Erklärung).\n"
+        "Nur die Ich-Antwort + GENAU EIN Routing-Tag."
+    ),
+
 )

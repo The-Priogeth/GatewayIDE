@@ -3,7 +3,7 @@
 import json
 import inspect
 from typing import Any, Awaitable, Callable, Optional
-
+import asyncio
 
 class DemoAdapter:
     """
@@ -48,7 +48,8 @@ class DemoAdapter:
         )
 
         # ---- Runde 1 ----
-        first_out = self.agent.generate_reply(
+        first_out = await asyncio.to_thread(
+            self.agent.generate_reply,
             messages=[{"role": "user", "content": base_prompt}],
             sender=None,
         )
@@ -84,7 +85,8 @@ class DemoAdapter:
             "Bitte formuliere jetzt eine knappe, klare Antwort für den HMA."
         )
 
-        second_out = self.agent.generate_reply(
+        second_out = await asyncio.to_thread(
+            self.agent.generate_reply,
             messages=[
                 {"role": "user", "content": base_prompt},
                 {"role": "assistant", "content": first_text},

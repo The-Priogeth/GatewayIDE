@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, Optional, Callable, Tuple, Literal, cast
+import asyncio
 import inspect
 import json
 import re
@@ -15,6 +16,14 @@ class Route:
     target: Target
     args: dict[str, Any]
 
+
+@dataclass(frozen=True)
+class HMAConfig:
+    # Concurrency-Limit für Demo-Ausführung
+    max_parallel_targets: int = 3
+
+
+DEFAULT_HMA_CONFIG = HMAConfig()
 # ---- Demo-Selection / Aggregation (ehemals selectors.py) --------------------
 _CLAIM_PATTERNS: list[tuple[str, str]] = [
     ("name",        r"\b(hei[ßs]e?\s+ich|mein\s+name\s+ist|du\s+hei[ßs]t)\b.+"),
@@ -153,12 +162,17 @@ def parse_deliver_to(raw: Any) -> Route:
         return Route(target="user", args={})
 
 
-# Mapping zentral halten: Thread & Agent-Label pro Target ---------------------
+# Mapping zentral halten: Ziel-Thread & Agent-Label pro Target ----------------
+# Hinweis: In deinem Modell ist T2 die "Innenwelt" (Leona/inner voice) und T3 die
+# "Außenstimme"/Hub (outer voice), der mit Manager-Threads (T4/T5/T6) interagiert.
+# Deshalb routen wir "task/lib/trn" zunächst nach T3 (und können später optional
+# in die jeweiligen Manager-Threads spiegeln).
 _TARGET_META: dict[Target, Tuple[str, str]] = {
     "user": ("T1", "HMA→User"),
     "task": ("T3", "HMA→TaskManager"),
-    "lib": ("T3", "HMA→Librarian"),
-    "trn": ("T3", "HMA→Trainer"),}
+    "lib":  ("T3", "HMA→Librarian"),
+    "trn":  ("T3", "HMA→Trainer"),
+}
 
 class HMA:
     def __init__(
@@ -171,7 +185,9 @@ class HMA:
         llm: Any,  # LLMAdapter → Any, um Import-Zirkus zu vermeiden
         ctx_provider: Any | None = None,  # MemoryManager, ZepMemory etc.
         runtime: Any | None = None,  # SimpleNamespace aus bootstrap.ensure_runtime
+        config: HMAConfig = DEFAULT_HMA_CONFIG,
     ) -> None:
+        self._cfg: HMAConfig = config
         self._sys = som_system_prompt
         self._tpl = templates
         self._demos = list(demos)
@@ -212,7 +228,7 @@ class HMA:
             return f"{context}\n\n{ctx_block}".strip()
         return context or ctx_block
 
-    async def run(self, *, user_text: str, context: str = "") -> Dict[str, Any]:
+    async def run(self, *, user_text: str, context: str = "", corr_id: str | None = None) -> Dict[str, Any]:
         merged_context = await self._build_context(context)
         # Demos sehen denselben Kontext wie das SOM-LLM
         chosen = select_demos(user_text, merged_context, self._demos)
@@ -234,7 +250,8 @@ class HMA:
             ich_text=ich_text,
             inner_material=inner_material,
             route=route,
-            speaker_name="SOM",)
+            speaker_name="SOM",
+            corr_id=corr_id,)
 
     # ---- interne Helfer ----------------------------------------------------
     async def _add_memory(
@@ -274,6 +291,7 @@ class HMA:
         inner_material: str,
         route: Route,
         speaker_name: str = "SOM",
+        corr_id: str | None = None,
     ) -> Dict[str, Any]:
         target: Target = route.target
         route_args: Dict[str, Any] = route.args or {}
@@ -293,12 +311,12 @@ class HMA:
                 role="system",
                 name="SOM:inner",
                 thread="T2",
-                extra_meta={"corr_id": "no-id"},)
+                extra_meta={"corr_id": corr_id} if corr_id else None,)
         target_thread, who = _TARGET_META.get(target, ("T3", "HMA"))
         if ich_core:
             if self._msg:
                 try:
-                    self._msg.snapshot(ich_core, to=target, corr_id=None)
+                    self._msg.snapshot(ich_core, to=target, corr_id=corr_id)
                 except Exception:pass
             await self._add_memory(
                 mem_attr=f"{target_thread.lower()}_memory",
@@ -319,7 +337,7 @@ class HMA:
             "deliver_to_thread": target_thread,
             "route_args": route_args,
             "speaker": speaker_name,
-            "corr_id": None,
+            "corr_id": corr_id,
             "packet_id": None,
             "p_snapshot": None,
             "responses": resp_items,}
@@ -327,18 +345,35 @@ class HMA:
     async def _parallel_demo(
         self, demos: Iterable[Any], user_text: str, context: str
     ) -> list[Tuple[str, str]]:
-        results: list[Tuple[str, str]] = []
-        for d in demos:
+        demos_list = list(demos)
+        limit = max(1, int(self._cfg.max_parallel_targets))
+        sem = asyncio.Semaphore(limit)
+
+        async def _run_one(idx: int, d: Any) -> tuple[int, tuple[str, str] | None]:
+            name = getattr(d, "name", d.__class__.__name__)
             try:
-                name = getattr(d, "name", d.__class__.__name__)
-                res = d.run(user_text=user_text, context=context)
-                reply = await self._maybe_await(res)
+                async with sem:
+                    res = d.run(user_text=user_text, context=context)
+                    reply = await self._maybe_await(res)
                 if reply:
-                    results.append((name, str(reply)))
+                    return idx, (name, str(reply))
+                return idx, None
             except Exception as e:
                 if self._msg:
-                    self._msg.log(f"[DemoError] {d}: {e}", scope="HMA")
+                    self._msg.log(f"[DemoError] {name}: {e}", scope="HMA")
+                return idx, None
+
+        tasks = [asyncio.create_task(_run_one(i, d)) for i, d in enumerate(demos_list)]
+        done = await asyncio.gather(*tasks, return_exceptions=False)
+
+        # preserve original order deterministically
+        done.sort(key=lambda x: x[0])
+        results: list[Tuple[str, str]] = []
+        for _, item in done:
+            if item:
+                results.append(item)
         return results
+
 
     def _call_llm(self, final_prompt: str) -> Any:
         return self._llm.completion(system=self._sys, prompt=final_prompt)

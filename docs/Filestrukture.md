@@ -1,14 +1,6 @@
 **Gateway** ist eine modulare KI-Agentenplattform, die FastAPI, Autogen 2 Ziel ist ein orchestriertes Agentensystem mit WebSocket- und REST-Schnittstellen zur Live-Interaktion mit realen oder simulierten Systemen (z.B. UE5).
 
 Gateway/
-├── README.md
-├── .dockerignore
-├── .gitignore
-├── .env
-├── demoenv
-├── pyproject.toml
-├── build-win.bat
-├── uv.lock
 ├── .git/
 ├── .venv/
 ├── .vs/
@@ -16,6 +8,7 @@ Gateway/
 │   ├── __init__.py
 │   ├── main.py
 │   ├── bootstrap.py
+│   ├── reset_utils.py
 │   ├── memory/
 │   │   ├── __init__.py
 │   │   ├── memory.py
@@ -27,7 +20,11 @@ Gateway/
 │   ├── ag2/
 │   ├── agent_core/
 │   │   ├── __init__.py
+│   │   ├── agents.py
+│   │   ├── demo_adapter.py
+│   │   ├── llm_adapter.py
 │   │   ├── messaging.py
+│   │   ├── tool_reg.py
 │   │   ├── managers/
 │   │   │   ├── __init__.py
 │   │   │   ├── librarian.py
@@ -38,9 +35,6 @@ Gateway/
 │   │       ├── __init__
 │   │       ├── hma_config.py
 │   │       ├── hma.py
-│   │       ├── routing.py
-│   │       ├── selectors.py
-│   │       └── speaker.py
 │   └── routes/
 │       ├── __init__.py
 │       ├── chat_api.py
@@ -84,3 +78,12 @@ Gateway/
     ├── MainWindow.axaml
     ├── MainWindow.axaml C#
     └── Program C#
+
+├── .env
+├── .gitattributes
+├── .gitignore
+├── build-win.bat
+├── demoenv
+├── pyproject.toml
+├── README.md
+├── uv.lock

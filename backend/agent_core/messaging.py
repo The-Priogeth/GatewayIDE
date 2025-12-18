@@ -109,5 +109,7 @@ class UserProxy:
             )
 
         # 2) HMA kümmert sich um alles Weitere (Kontext, Speaker, Routing)
-        result = await self._hma.run(user_text=msg.text, context="")
+        from backend.bootstrap import corr_id_var
+        cid = corr_id_var.get()
+        result = await self._hma.run(user_text=msg.text, context="", corr_id=cid)
         return result
