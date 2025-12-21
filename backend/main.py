@@ -19,6 +19,7 @@ logger.add(sys.stderr, level=LOG_LEVEL)
 from backend import bootstrap
 from backend.routes.websocket import start_watcher
 from backend.routes.chat_api import router as chat_router
+from backend.routes.agent_hq import router as agent_hq_router
 from backend.routes import reset_api
 
 
@@ -88,7 +89,7 @@ app = FastAPI(
 
 app.include_router(chat_router, tags=["chat"])
 app.include_router(reset_api.router)
-
+app.include_router(agent_hq_router)
 
 # -----------------------------------------------------------------------------#
 # 🧾 Middleware: Correlation-Id & Request-Logging
